@@ -1,0 +1,446 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Komponenter. Forudsætter tokens.css og base.css.
+   Ingen hardkodede farver — alt gennem tokens.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Knapper ─────────────────────────────────────────────────────────────────
+   Minimum 48px høje. Primære handlinger 56px (designoplæg §2). */
+.knap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--plads-2);
+  min-height: var(--tryk-min);
+  min-width: var(--tryk-min);
+  padding: var(--plads-3) var(--plads-5);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--tekst-md);
+  font-weight: var(--vaegt-fed);
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color var(--skift), border-color var(--skift);
+}
+
+.knap--stor { min-height: var(--tryk-primaer); font-size: var(--tekst-lg); width: 100%; }
+@media (min-width: 560px) { .knap--stor { width: auto; } }
+
+/* Primær: navy flade, hvid tekst. 11,27:1. */
+.knap--primaer {
+  background: var(--farve-navy);
+  border-color: var(--farve-navy);
+  color: var(--farve-tekst-omvendt);
+}
+.knap--primaer:hover:not(:disabled) {
+  background: var(--farve-navy-moerk);
+  border-color: var(--farve-navy-moerk);
+  color: var(--farve-tekst-omvendt);
+}
+
+.knap--sekundaer {
+  background: var(--farve-flade);
+  border-color: var(--farve-kant-staerk);
+  color: var(--farve-navy);
+}
+.knap--sekundaer:hover:not(:disabled) {
+  background: var(--farve-navy-svag);
+  border-color: var(--farve-navy);
+}
+
+/* Accent: orange flade med NAVY tekst.
+   Hvid tekst på orange er 2,97:1 og ville ikke bestå AA. Navy på orange er 3,8:1
+   — nok til store, fede knaptekster, ikke til brødtekst. Derfor kun til knapper. */
+.knap--accent {
+  background: var(--farve-orange);
+  border-color: var(--farve-orange);
+  color: var(--farve-navy);
+}
+.knap--accent:hover:not(:disabled) {
+  background: var(--farve-orange-moerk);
+  border-color: var(--farve-orange-moerk);
+}
+
+.knap--fare {
+  background: var(--farve-fejl);
+  border-color: var(--farve-fejl);
+  color: var(--farve-tekst-omvendt);
+}
+.knap--fare:hover:not(:disabled) { filter: brightness(0.9); }
+
+.knap--tekst {
+  background: none;
+  border-color: transparent;
+  color: var(--farve-navy);
+  padding-inline: var(--plads-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.knap--tekst:hover:not(:disabled) { background: var(--farve-navy-svag); }
+
+.knap:disabled,
+.knap[aria-disabled="true"] {
+  background: var(--farve-flade-daempet);
+  border-color: var(--farve-flade-daempet);
+  /* 4,6:1 mod den dæmpede flade — deaktiveret må stadig kunne læses. */
+  color: var(--farve-tekst-svag);
+  pointer-events: none;
+}
+
+/* ── Formularer ──────────────────────────────────────────────────────────────── */
+.felt { display: flex; flex-direction: column; gap: var(--plads-2); }
+.felt + .felt { margin-top: var(--plads-4); }
+
+.label {
+  font-size: var(--tekst-sm);
+  font-weight: var(--vaegt-fed);
+  color: var(--farve-navy);
+}
+.label__valgfri { font-weight: var(--vaegt-normal); color: var(--farve-tekst-svag); }
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: var(--tryk-min);
+  padding: var(--plads-3);
+  /* Aldrig under 16px: iOS zoomer selv ind på mindre inputfelter ved fokus. */
+  font-size: var(--tekst-md);
+  color: var(--farve-tekst);
+  background: var(--farve-flade);
+  border: 1px solid var(--farve-kant-staerk);
+  border-radius: var(--radius-md);
+  transition: border-color var(--skift), box-shadow var(--skift);
+}
+.textarea { min-height: 7rem; resize: vertical; line-height: var(--linje-normal); }
+
+.input:focus, .select:focus, .textarea:focus {
+  outline: none;
+  border-color: var(--farve-navy);
+  box-shadow: var(--fokus-ring);
+}
+
+.input[aria-invalid="true"],
+.select[aria-invalid="true"],
+.textarea[aria-invalid="true"] {
+  border-color: var(--farve-fejl);
+  border-width: 2px;
+}
+
+.input:disabled, .select:disabled, .textarea:disabled {
+  background: var(--farve-flade-daempet);
+  color: var(--farve-tekst-svag);
+}
+
+.hjaelpetekst { font-size: var(--tekst-sm); color: var(--farve-tekst-svag); }
+
+/* Fejlbeskeden knyttes til feltet med aria-describedby, ikke kun til toppen af
+   siden (designoplæg §7). Ikonet er dekorativt — teksten bærer betydningen. */
+.fejlbesked {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--plads-2);
+  font-size: var(--tekst-sm);
+  font-weight: var(--vaegt-fed);
+  color: var(--farve-fejl);
+}
+.fejlbesked::before { content: "!"; flex: 0 0 auto; font-weight: var(--vaegt-fed); }
+
+/* Afkrydsning og radio — hele rækken er tryflade. */
+.valg {
+  display: flex;
+  align-items: center;
+  gap: var(--plads-3);
+  min-height: var(--tryk-min);
+  padding: var(--plads-2) var(--plads-3);
+  border: var(--kant);
+  border-radius: var(--radius-md);
+  background: var(--farve-flade);
+  cursor: pointer;
+}
+.valg:hover { border-color: var(--farve-kant-staerk); }
+.valg input { width: 22px; height: 22px; accent-color: var(--farve-navy); flex: 0 0 auto; }
+.valg:has(input:focus-visible) { box-shadow: var(--fokus-ring); border-color: var(--farve-navy); }
+.valg:has(input:checked) { border-color: var(--farve-navy); background: var(--farve-navy-svag); }
+
+/* ── Kort ────────────────────────────────────────────────────────────────────── */
+.kort {
+  display: block;
+  padding: var(--plads-4);
+  background: var(--farve-flade);
+  border: var(--kant);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--skygge-sm);
+}
+
+a.kort, button.kort {
+  text-align: left;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--skift), box-shadow var(--skift);
+}
+a.kort:hover, button.kort:hover {
+  border-color: var(--farve-navy);
+  box-shadow: var(--skygge-md);
+}
+
+.kort__titel {
+  font-size: var(--tekst-lg);
+  font-weight: var(--vaegt-fed);
+  color: var(--farve-navy);
+  margin-bottom: var(--plads-1);
+}
+.kort__tekst { font-size: var(--tekst-sm); color: var(--farve-tekst-svag); }
+
+/* Orange som ren fladefarve — ingen tekst ovenpå. */
+.kort__ikon {
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  margin-bottom: var(--plads-3);
+  background: var(--farve-orange);
+  border-radius: var(--radius-md);
+  color: var(--farve-navy);
+  font-weight: var(--vaegt-fed);
+}
+
+/* Låst kort — synligt, ikke skjult (CLAUDE.md §9.2).
+   Det er et UI-valg. Adgangskontrollen ligger serverside. */
+.kort--laast {
+  background: var(--farve-flade-svag);
+  border-style: dashed;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.kort--laast .kort__titel { color: var(--farve-tekst-svag); }
+.kort--laast .kort__ikon  { background: var(--farve-flade-daempet); color: var(--farve-tekst-svag); }
+.kort--laast:hover { border-color: var(--farve-kant); box-shadow: none; }
+
+.kort--paavej { background: var(--farve-flade-svag); border-style: dashed; box-shadow: none; }
+.kort--paavej .kort__titel { color: var(--farve-tekst-svag); }
+.kort--paavej .kort__ikon  { background: var(--farve-flade-daempet); color: var(--farve-tekst-svag); }
+
+/* ── Badges ──────────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--plads-1);
+  padding: 2px var(--plads-2);
+  border-radius: var(--radius-fuld);
+  font-size: var(--tekst-xs);
+  font-weight: var(--vaegt-fed);
+  white-space: nowrap;
+}
+.badge--neutral   { background: var(--farve-flade-daempet);  color: var(--farve-tekst); }
+.badge--ok        { background: var(--farve-ok-svag);        color: var(--farve-ok); }
+.badge--advarsel  { background: var(--farve-advarsel-svag);  color: var(--farve-advarsel); }
+.badge--fejl      { background: var(--farve-fejl-svag);      color: var(--farve-fejl); }
+.badge--accent    { background: var(--farve-orange-svag);    color: var(--farve-orange-tekst); }
+
+/* ── Tabel ───────────────────────────────────────────────────────────────────
+   På smal skærm bliver rækker til kort. Hver celle får sin label fra
+   data-label, så kolonneoverskriften ikke går tabt (designoplæg §4.4). */
+.tabel-omslag { overflow-x: auto; }
+
+.tabel { font-size: var(--tekst-sm); background: var(--farve-flade); }
+.tabel th, .tabel td { padding: var(--plads-3); text-align: left; }
+.tabel thead th {
+  background: var(--farve-navy-svag);
+  color: var(--farve-navy);
+  font-weight: var(--vaegt-fed);
+  white-space: nowrap;
+  border-bottom: 2px solid var(--farve-kant-staerk);
+}
+.tabel tbody tr { border-bottom: var(--kant); }
+.tabel tbody tr:hover { background: var(--farve-flade-svag); }
+.tabel td.tal, .tabel th.tal { text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 719px) {
+  .tabel thead { display: none; }
+  .tabel, .tabel tbody, .tabel tr, .tabel td { display: block; width: 100%; }
+  .tabel tbody tr {
+    margin-bottom: var(--plads-3);
+    border: var(--kant);
+    border-radius: var(--radius-md);
+    background: var(--farve-flade);
+  }
+  .tabel td {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--plads-4);
+    padding: var(--plads-2) var(--plads-3);
+    border-bottom: var(--kant);
+  }
+  .tabel td:last-child { border-bottom: none; }
+  .tabel td::before {
+    content: attr(data-label);
+    font-weight: var(--vaegt-fed);
+    color: var(--farve-navy);
+    flex: 0 0 auto;
+  }
+  .tabel td.tal { text-align: right; }
+}
+
+/* ── Beskeder ────────────────────────────────────────────────────────────────── */
+.besked {
+  display: flex;
+  gap: var(--plads-3);
+  padding: var(--plads-3) var(--plads-4);
+  border-radius: var(--radius-md);
+  border-left: 4px solid;
+  font-size: var(--tekst-sm);
+}
+.besked--info     { background: var(--farve-navy-svag);      border-color: var(--farve-navy);     color: var(--farve-tekst); }
+.besked--ok       { background: var(--farve-ok-svag);        border-color: var(--farve-ok);       color: var(--farve-ok); }
+.besked--advarsel { background: var(--farve-advarsel-svag);  border-color: var(--farve-orange);   color: var(--farve-advarsel); }
+.besked--fejl     { background: var(--farve-fejl-svag);      border-color: var(--farve-fejl);     color: var(--farve-fejl); }
+
+/* ── Tom tilstand ────────────────────────────────────────────────────────────── */
+.tom {
+  display: grid;
+  place-items: center;
+  gap: var(--plads-3);
+  padding: var(--plads-7) var(--plads-4);
+  text-align: center;
+  background: var(--farve-flade);
+  border: 1px dashed var(--farve-kant-staerk);
+  border-radius: var(--radius-lg);
+}
+.tom__titel { font-weight: var(--vaegt-fed); color: var(--farve-navy); }
+.tom__tekst { font-size: var(--tekst-sm); color: var(--farve-tekst-svag); max-width: 42ch; }
+
+/* ── Loading ─────────────────────────────────────────────────────────────────── */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--farve-kant);
+  border-top-color: var(--farve-navy);
+  border-radius: 50%;
+  animation: snurr 700ms linear infinite;
+}
+@keyframes snurr { to { transform: rotate(360deg); } }
+
+.skelet {
+  background: linear-gradient(90deg,
+    var(--farve-flade-daempet) 25%,
+    var(--farve-flade-svag) 37%,
+    var(--farve-flade-daempet) 63%);
+  background-size: 400% 100%;
+  animation: skelet 1.2s ease infinite;
+  border-radius: var(--radius-sm);
+  min-height: 1rem;
+}
+@keyframes skelet { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2s; }
+  .skelet  { animation: none; }
+}
+
+/* ── Header og footer ────────────────────────────────────────────────────────── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--farve-navy);
+  color: var(--farve-tekst-omvendt);
+}
+/* Orange streg under headeren — brandet som fladefarve, ingen tekst ovenpå. */
+.header::after { content: ""; display: block; height: 3px; background: var(--farve-orange); }
+
+.header__rk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--plads-4);
+  min-height: var(--header-hoejde);
+}
+
+.logo { display: flex; align-items: center; gap: var(--plads-2); text-decoration: none; }
+.logo:hover { text-decoration: none; }
+.logo__mark {
+  display: grid; place-items: center;
+  width: 30px; height: 30px;
+  background: var(--farve-orange);
+  border-radius: var(--radius-sm);
+  color: var(--farve-navy);
+  font-weight: var(--vaegt-fed);
+  font-size: var(--tekst-sm);
+}
+.logo__navn {
+  font-weight: var(--vaegt-fed);
+  letter-spacing: 0.04em;
+  color: var(--farve-tekst-omvendt);
+  text-transform: uppercase;
+  font-size: var(--tekst-md);
+}
+.logo__tag {
+  padding: 1px var(--plads-2);
+  background: var(--farve-orange);
+  border-radius: var(--radius-sm);
+  /* Navy på orange, ikke hvid. Ordet er kort, fedt og versal — 3,8:1 rækker. */
+  color: var(--farve-navy);
+  font-weight: var(--vaegt-fed);
+  font-size: var(--tekst-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.header .knap--sekundaer {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--farve-tekst-omvendt);
+  min-height: 40px;
+  padding-inline: var(--plads-4);
+}
+.header .knap--sekundaer:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--farve-tekst-omvendt);
+  color: var(--farve-tekst-omvendt);
+}
+
+.footer {
+  margin-top: var(--plads-7);
+  padding-block: var(--plads-5);
+  border-top: var(--kant);
+  font-size: var(--tekst-sm);
+  color: var(--farve-tekst-svag);
+}
+.footer__rk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--plads-2) var(--plads-4);
+  justify-content: space-between;
+}
+
+/* ── Sidelayout ──────────────────────────────────────────────────────────────── */
+.side { min-height: 100dvh; display: flex; flex-direction: column; }
+.side__hoved { flex: 1; padding-block: var(--plads-5) var(--plads-6); }
+
+.sektion + .sektion { margin-top: var(--plads-6); }
+.sektion__titel {
+  display: flex;
+  align-items: baseline;
+  gap: var(--plads-3);
+  margin-bottom: var(--plads-3);
+  font-size: var(--tekst-md);
+  font-weight: var(--vaegt-fed);
+  color: var(--farve-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.sektion__titel::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--farve-kant);
+}
+
+.gitter {
+  display: grid;
+  gap: var(--plads-3);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 560px) { .gitter { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .gitter { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1100px) { .gitter--4 { grid-template-columns: repeat(4, 1fr); } }

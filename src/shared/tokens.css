@@ -1,0 +1,127 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Design tokens — STARK Udlejning Platform
+   Eneste sted farver, spacing, typografi og skygger defineres.
+   Ingen hardkodede farver i komponenter (CLAUDE.md §10).
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Brand ──────────────────────────────────────────────────────────────────
+     KONTRASTREGEL — læs før du bruger orange.
+
+     #E87722 giver 2,97:1 mod hvid. Det består ikke WCAG AA, hverken for brødtekst
+     (4,5:1) eller store tekster (3:1). Orange er derfor en FLADEFARVE og
+     accentfarve — baggrunde, streger, ikoner, aktiv-markering — aldrig tekst på
+     hvid, og aldrig hvid tekst ovenpå ved almindelige størrelser.
+
+     Skal orange bruges som knapflade, er teksten navy eller næsten sort.
+     Skal en tekst være orange, bruges --farve-orange-tekst (4,7:1). */
+  --farve-orange:        #E87722;  /* 2,97:1 mod hvid — flade og accent, ALDRIG tekst */
+  --farve-orange-moerk:  #C4611A;  /* hover på orange flader */
+  --farve-orange-tekst:  #B35C00;  /* 4,72:1 mod hvid — den eneste orange, tekst må have */
+  --farve-orange-svag:   #FDF1E7;  /* flade bag advarsler og aktive rækker */
+
+  --farve-navy:          #1B3A6B;  /* 11,27:1 mod hvid — tekst, overskrifter, primær knap */
+  --farve-navy-moerk:    #132C52;  /* hover på navy flader */
+  --farve-navy-svag:     #EEF2F8;
+
+  --farve-hvid:          #FFFFFF;
+
+  /* ── Neutral ───────────────────────────────────────────────────────────────── */
+  --farve-tekst:         #16233A;  /* 13,9:1 — brødtekst */
+  --farve-tekst-svag:    #5A6478;  /* 5,9:1  — hjælpetekst, stadig AA */
+  --farve-tekst-omvendt: #FFFFFF;
+
+  --farve-flade:         #FFFFFF;
+  --farve-flade-svag:    #F5F7FA;
+  --farve-flade-daempet: #EAEEF4;
+
+  --farve-kant:          #D5DCE6;
+  --farve-kant-staerk:   #A9B4C4;
+
+  /* ── Status ────────────────────────────────────────────────────────────────
+     Alle tekstvarianter er valgt til mindst 4,5:1 mod hvid. */
+  --farve-fejl:          #B3261E;  /* 6,0:1  */
+  --farve-fejl-svag:     #FCEDEC;
+  --farve-ok:            #1B6B3A;  /* 5,9:1  */
+  --farve-ok-svag:       #EAF5EE;
+  --farve-advarsel:      #8A5A00;  /* 5,2:1  */
+  --farve-advarsel-svag: #FFF6E5;
+
+  /* ── Fokus ─────────────────────────────────────────────────────────────────
+     Navy og ikke orange: fokusmarkering er et UI-element og skal have mindst
+     3:1 mod baggrunden. Orange har 2,97:1 og falder lige under. */
+  --farve-fokus:         #1B3A6B;
+  --fokus-ring:          0 0 0 3px rgba(27, 58, 107, 0.35);
+
+  /* ── Typografi ─────────────────────────────────────────────────────────────
+     Systemfont-stak. Ingen kald til Google Fonts eller andre CDN'er
+     (CLAUDE.md §10, designoplæg §6). Stakken kræver ingen filer i repoet og
+     ingen netværkskald, og den renderer med det samme — vigtigt for et værktøj,
+     der åbnes femten gange om dagen.
+
+     Vælges der senere en fri, selvhostet brandfont, ændres kun disse to linjer,
+     og filerne lægges i src/shared/fonts/. */
+  --font-brug: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-tal:  ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+               "Liberation Mono", monospace;
+
+  /* Skala, 1.200 (minor third), basis 16px. Mobil først. */
+  --tekst-xs:   0.75rem;   /* 12px — badges, metadata */
+  --tekst-sm:   0.875rem;  /* 14px — hjælpetekst */
+  --tekst-md:   1rem;      /* 16px — brødtekst. Aldrig mindre i inputfelter:
+                              under 16px zoomer iOS automatisk ved fokus. */
+  --tekst-lg:   1.125rem;  /* 18px */
+  --tekst-xl:   1.375rem;  /* 22px */
+  --tekst-2xl:  1.75rem;   /* 28px */
+  --tekst-3xl:  2.125rem;  /* 34px */
+
+  --vaegt-normal: 400;
+  --vaegt-fed:    600;
+  /* Maks to vægte pr. skærm (designoplæg §5). Derfor kun to. */
+
+  --linje-taet:  1.25;
+  --linje-normal: 1.55;
+
+  /* ── Spacing — 4px-basis ───────────────────────────────────────────────────── */
+  --plads-1:  0.25rem;
+  --plads-2:  0.5rem;
+  --plads-3:  0.75rem;
+  --plads-4:  1rem;
+  --plads-5:  1.5rem;
+  --plads-6:  2rem;
+  --plads-7:  3rem;
+  --plads-8:  4rem;
+
+  /* ── Tryflader ─────────────────────────────────────────────────────────────
+     Pladspersonale bruger platformen på telefon, udendørs, i arbejdshandsker.
+     48px er gulvet, ikke målet (designoplæg §2). */
+  --tryk-min:     48px;
+  --tryk-primaer: 56px;
+
+  /* ── Form ──────────────────────────────────────────────────────────────────── */
+  --radius-sm:  3px;
+  --radius-md:  6px;
+  --radius-lg:  10px;
+  --radius-fuld: 999px;
+
+  --skygge-sm: 0 1px 2px rgba(22, 35, 58, 0.08);
+  --skygge-md: 0 2px 8px rgba(22, 35, 58, 0.10);
+  --skygge-lg: 0 8px 24px rgba(22, 35, 58, 0.14);
+
+  --kant:        1px solid var(--farve-kant);
+  --kant-staerk: 2px solid var(--farve-navy);
+
+  /* ── Layout ────────────────────────────────────────────────────────────────── */
+  --bredde-indhold: 1180px;
+  --bredde-smal:    440px;   /* login, enkeltformularer */
+  --header-hoejde:  64px;
+
+  /* ── Bevægelse ─────────────────────────────────────────────────────────────
+     Kun korte tilstandsskift. Ingen animationer ud over det (designoplæg §5). */
+  --skift: 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --skift: 0ms; }
+}

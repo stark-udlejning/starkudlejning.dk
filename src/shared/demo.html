@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Komponenter — STARK Udlejning</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  /* Kun til denne side — ikke en del af designsystemet. */
+  .demo-rk { display: flex; flex-wrap: wrap; gap: var(--plads-3); align-items: center; }
+  .demo-boks { padding: var(--plads-4); background: var(--farve-flade); border: var(--kant);
+               border-radius: var(--radius-md); }
+  .swatch { display: flex; align-items: center; gap: var(--plads-3); padding: var(--plads-2) 0; }
+  .swatch__prik { width: 44px; height: 44px; border-radius: var(--radius-md);
+                  border: 1px solid var(--farve-kant); flex: 0 0 auto; }
+  .swatch__navn { font-family: var(--font-tal); font-size: var(--tekst-sm); }
+  .swatch__note { font-size: var(--tekst-sm); color: var(--farve-tekst-svag); }
+</style>
+</head>
+<body>
+<a class="spring-til-indhold" href="#hoved">Spring til indhold</a>
+
+<div class="side">
+  <header class="header">
+    <div class="indhold header__rk">
+      <a class="logo" href="/">
+        <span class="logo__mark" aria-hidden="true">S</span>
+        <span class="logo__navn">Stark</span>
+        <span class="logo__tag">Udlejning</span>
+      </a>
+      <button type="button" class="knap knap--sekundaer">Log ud</button>
+    </div>
+  </header>
+
+  <main class="side__hoved indhold" id="hoved">
+    <h1>Komponenter</h1>
+    <p class="hjaelpetekst" style="margin-top:var(--plads-2);max-width:70ch">
+      Alle komponenter i designsystemet, så de kan gennemgås ét sted. Åbn filen direkte i
+      en browser — ingen opsætning, intet build, ingen netværkskald.
+    </p>
+
+    <!-- ── Farver ── -->
+    <section class="sektion">
+      <h2 class="sektion__titel">Farver</h2>
+      <div class="demo-boks">
+        <div class="swatch">
+          <span class="swatch__prik" style="background:var(--farve-navy)"></span>
+          <span><span class="swatch__navn">--farve-navy #1B3A6B</span><br>
+          <span class="swatch__note">11,3:1 mod hvid. Tekst, overskrifter, primær knap.</span></span>
+        </div>
+        <div class="swatch">
+          <span class="swatch__prik" style="background:var(--farve-orange)"></span>
+          <span><span class="swatch__navn">--farve-orange #E87722</span><br>
+          <span class="swatch__note"><strong>2,97:1 — består ikke AA.</strong> Kun flade, streger og ikoner. Aldrig tekst på hvid.</span></span>
+        </div>
+        <div class="swatch">
+          <span class="swatch__prik" style="background:var(--farve-orange-tekst)"></span>
+          <span><span class="swatch__navn">--farve-orange-tekst #B35C00</span><br>
+          <span class="swatch__note">4,7:1 mod hvid. Den eneste orange, tekst må have.</span></span>
+        </div>
+        <div class="swatch">
+          <span class="swatch__prik" style="background:var(--farve-tekst)"></span>
+          <span><span class="swatch__navn">--farve-tekst #16233A</span><br>
+          <span class="swatch__note">13,9:1. Brødtekst.</span></span>
+        </div>
+        <div class="swatch">
+          <span class="swatch__prik" style="background:var(--farve-tekst-svag)"></span>
+          <span><span class="swatch__navn">--farve-tekst-svag #5A6478</span><br>
+          <span class="swatch__note">5,9:1. Hjælpetekst og metadata.</span></span>
+        </div>
+      </div>
+      <div class="besked besked--advarsel" style="margin-top:var(--plads-3)">
+        <span><strong>Kontrastreglen.</strong> Orange <span class="tal">#E87722</span> giver
+        2,97:1 mod hvid og består hverken AA for brødtekst (4,5:1) eller for store tekster
+        (3:1). Den bruges derfor som fladefarve. Denne linjes tekstfarve er
+        <span class="tal">--farve-advarsel</span>, ikke orange.</span>
+      </div>
+    </section>
+
+    <!-- ── Knapper ── -->
+    <section class="sektion">
+      <h2 class="sektion__titel">Knapper</h2>
+      <div class="demo-boks">
+        <div class="demo-rk">
+          <button class="knap knap--primaer">Primær</button>
+          <button class="knap knap--sekundaer">Sekundær</button>
+          <button class="knap knap--accent">Accent</button>
+          <button class="knap knap--fare">Slet</button>
+          <button class="knap knap--tekst">Tekstknap</button>
+          <button class="knap knap--primaer" disabled>Deaktiveret</button>
+        </div>
+        <div class="demo-rk" style="margin-top:var(--plads-4)">
+          <button class="knap knap--primaer knap--stor">Primær handling (56 px)</button>
+        </div>
+        <p class="hjaelpetekst" style="margin-top:var(--plads-3)">
+          Minimum 48×48 px, primære handlinger 56 px. Accentknappen har navy tekst på
+          orange — hvid tekst ville være 2,97:1.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── Formular ── -->
+    <section class="sektion">
+      <h2 class="sektion__titel">Formularfelter</h2>
+      <div class="demo-boks" style="max-width:var(--bredde-smal)">
+        <div class="felt">
+          <label class="label" for="d1">Mailadresse</label>
+          <input class="input" id="d1" type="email" placeholder="fornavn.efternavn@stark.dk"
+                 aria-describedby="d1-hj">
+          <span class="hjaelpetekst" id="d1-hj">Kun @stark.dk-adresser.</span>
+        </div>
+
+        <div class="felt">
+          <label class="label" for="d2">Engangskode</label>
+          <input class="input" id="d2" inputmode="numeric" value="123456"
+                 aria-invalid="true" aria-describedby="d2-fejl">
+          <span class="fejlbesked" id="d2-fejl">Koden er forkert. Du har 3 forsøg tilbage.</span>
+        </div>
+
+        <div class="felt">
+          <label class="label" for="d3">Afdeling</label>
+          <select class="select" id="d3">
+            <option>Vælg afdeling</option>
+            <option>580 Køge</option>
+            <option>Glostrup</option>
+          </select>
+        </div>
+
+        <div class="felt">
+          <label class="label" for="d4">Uddybning
+            <span class="label__valgfri">(valgfri)</span></label>
+          <textarea class="textarea" id="d4" placeholder="Beskriv hvad der skete"></textarea>
+        </div>
+
+        <div class="felt">
+          <span class="label">Type</span>
+          <label class="valg"><input type="checkbox" checked> Materielskade</label>
+          <label class="valg"><input type="checkbox"> Forsinket levering</label>
+          <label class="valg"><input type="radio" name="d5" checked> Ja</label>
+          <label class="valg"><input type="radio" name="d5"> Nej</label>
+        </div>
+
+        <div class="felt">
+          <label class="label" for="d6">Deaktiveret felt</label>
+          <input class="input" id="d6" value="Kan ikke redigeres" disabled>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Kort ── -->
+    <section class="sektion">
+      <h2 class="sektion__titel">Kort</h2>
+      <div class="gitter">
+        <a class="kort" href="#hoved">
+          <span class="kort__ikon" aria-hidden="true">SA</span>
+          <div class="kort__titel">Samhandel</div>
+          <p class="kort__tekst">Samhandelsaftaler, tilbud og prisberegning.</p>
+        </a>
+
+        <div class="kort kort--laast">
+          <span class="kort__ikon" aria-hidden="true">AD</span>
+          <div class="kort__titel">
+            Admin
+            <span class="badge badge--neutral">Låst</span>
+          </div>
+          <p class="kort__tekst">Kræver admin-rolle.</p>
+          <span class="kun-skaermlaeser">Låst. Kræver admin-rolle.</span>
+        </div>
+
+        <div class="kort kort--paavej">
+          <span class="kort__ikon" aria-hidden="true">HU</span>
+          <div class="kort__titel">
+            HUB
+            <span class="badge badge--accent">På vej</span>
+          </div>
+          <p class="kort__tekst">Tidsregistrering. Endnu ikke flyttet.</p>
+        </div>
+      </div>
+      <p class="hjaelpetekst" style="margin-top:var(--plads-3)">
+        Låste kort vises for alle, ikke skjult. Låsen er UI — kontrollen ligger serverside.
+        Skærmlæsere får låsetilstanden som tekst, ikke kun som ikon.
+      </p>
+    </section>
+
+    <!-- ── Badges ── -->
+    <section class="sektion">
+      <h2 class="sektion__titel">Badges</h2>
+      <div class="demo-boks demo-rk">
+        <span class="badge badge--neutral">Kladde</span>
+        <span class="badge badge--ok">Accepteret</span>
+        <span class="badge badge--advarsel">Afventer</span>
+        <span class="badge badge--fejl">Afvist</span>
+        <span class="badge badge--accent">På vej</span>
+      </div>
+    </section>
+
+    <!-- ── Tabel ── -->
+    <section class="sektion">
+      <h2 class="sektion__titel">Tabel</h2>
+      <div class="tabel-omslag">
+        <table class="tabel">
+          <thead>
+            <tr>
+              <th scope="col">Bruger</th>
+              <th scope="col">Rolle</th>
+              <th scope="col">Seneste login</th>
+              <th scope="col" class="tal">Logins</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Bruger">test1@starkudlejning.dk</td>
+              <td data-label="Rolle"><span class="badge badge--ok">admin</span></td>
+              <td data-label="Seneste login">11-08-2026 08:14</td>
+              <td data-label="Logins" class="tal">42</td>
+            </tr>
+            <tr>
+              <td data-label="Bruger">test2@starkudlejning.dk</td>
+              <td data-label="Rolle"><span class="badge badge--neutral">bruger</span></td>
+              <td data-label="Seneste login">10-08-2026 16:02</td>
+              <td data-label="Logins" class="tal">7</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="hjaelpetekst" style="margin-top:var(--plads-3)">
+        Gør vinduet smallere end 720 px: rækkerne bliver til kort, og hver celle får sin
+        kolonneoverskrift fra <span class="tal">data-label</span>.
+      </p>
+    </section>
+
+    <!-- ── Beskeder ── -->
+    <section class="sektion">
+      <h2 class="sektion__titel">Beskeder</h2>
+      <div class="demo-boks" style="display:grid;gap:var(--plads-3)">
+        <div class="besked besked--info">Koden udløber om 9:42.</div>
+        <div class="besked besked--ok">Afvigelsen er registreret.</div>
+        <div class="besked besked--advarsel">Tilbuddet udløber om to dage.</div>
+        <div class="besked besked--fejl">Kunne ikke sende. Prøv igen.</div>
+      </div>
+    </section>
+
+    <!-- ── Tom og loading ── -->
+    <section class="sektion">
+      <h2 class="sektion__titel">Tom tilstand og loading</h2>
+      <div class="gitter" style="grid-template-columns:1fr">
+        <div class="tom">
+          <span class="tom__titel">Ingen afvigelser endnu</span>
+          <span class="tom__tekst">Når nogen indsender en afvigelse, vises den her.</span>
+          <button class="knap knap--sekundaer">Opret afvigelse</button>
+        </div>
+        <div class="demo-boks demo-rk">
+          <span class="spinner" role="status" aria-label="Henter"></span>
+          <span class="hjaelpetekst">Henter …</span>
+        </div>
+        <div class="demo-boks" style="display:grid;gap:var(--plads-2)">
+          <div class="skelet" style="width:40%"></div>
+          <div class="skelet" style="width:85%"></div>
+          <div class="skelet" style="width:70%"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="indhold footer__rk">
+      <span>STARK Udlejning · internt værktøj</span>
+      <span>Komponentark</span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
