@@ -77,11 +77,16 @@ describe('hashEmail', () => {
       expect(hashKunde(10002152)).toBe(hashKunde('10002152'));
     });
 
-    it('deler nøglerum med hashEmail — dokumenteret, ikke utilsigtet', () => {
-      // CLAUDE.md §4 definerer begge som samme HMAC. Testen fastholder den
-      // egenskab, så et fremtidigt skift til domæneadskilte hashes bliver et
-      // bevidst valg med en migration, ikke en tilfældig ændring.
-      expect(hashKunde('10002152')).toBe(hashEmail('10002152'));
+    it('deler IKKE nøglerum med hashEmail — domæneadskillelse er obligatorisk', () => {
+      // CLAUDE.md §4: uden domæneprefix ville hashEmail('580') og hashKunde('580')
+      // give samme værdi, og en kunde_hash brugt ved et uheld mod `brugere` ville
+      // ramme en tilfældig række i stedet for at fejle højt.
+      expect(hashKunde('580')).not.toBe(hashEmail('580'));
+      expect(hashKunde('10002152')).not.toBe(hashEmail('10002152'));
+    });
+
+    it('har stadig samme hashformat som resten', () => {
+      expect(hashKunde('10002152')).toMatch(/^[0-9a-f]{64}$/);
     });
   });
 

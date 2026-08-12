@@ -43,16 +43,22 @@ function hentSecret() {
 }
 
 /**
- * HMAC-SHA256 over en normaliseret værdi.
+ * HMAC-SHA256 over `<domæne>:<normaliseret værdi>`.
  *
  * Normaliseringen (trim + lowercase) er det, der gør at "  Jesper@Stark.dk " og
  * "jesper@stark.dk" rammer den samme række. Ændres normaliseringen nogensinde,
  * mister alle eksisterende rækker deres nøgle — præcis som ved rotation af secret.
  *
+ * Domæneprefixet er obligatorisk (CLAUDE.md §4). Uden det ville hashEmail('580')
+ * og hashKunde('580') give samme værdi, og en kunde_hash brugt ved et uheld mod
+ * `brugere` ville ramme en tilfældig række i stedet for at fejle højt.
+ * Prefixet må aldrig ændres uden en migration af alle eksisterende hashes.
+ *
+ * @param {string} domaene   'email', 'kunde', … Nye hashtyper får deres eget.
  * @param {string|number} vaerdi
  * @returns {string} 64 hex-tegn
  */
-function hmac(vaerdi) {
+function hmac(domaene, vaerdi) {
   if (vaerdi === null || vaerdi === undefined) {
     throw new TypeError('hash: værdien må ikke være null eller undefined');
   }
@@ -62,7 +68,7 @@ function hmac(vaerdi) {
   }
   return crypto
     .createHmac('sha256', hentSecret())
-    .update(normaliseret, 'utf8')
+    .update(`${domaene}:${normaliseret}`, 'utf8')
     .digest('hex');
 }
 
@@ -70,21 +76,13 @@ function hmac(vaerdi) {
  * Hash af en mailadresse — intern som ekstern. Nøglen i `brugere`, `sessioner`,
  * `fremdrift` og `audit_log`.
  */
-export const hashEmail = hmac;
+export const hashEmail = (vaerdi) => hmac('email', vaerdi);
 
 /**
  * Hash af et kundenummer. Gør omsætningstal mulige i Supabase uden at kundenummeret
  * selv ligger der (CLAUDE.md §4).
- *
- * Bemærk: `hashEmail` og `hashKunde` er med vilje samme funktion, præcis som CLAUDE.md §4
- * definerer dem. Det betyder, at de deler nøglerum — samme inputstreng giver samme hash
- * uanset hvilken af de to der kaldes. I praksis kolliderer en mailadresse og et
- * kundenummer ikke, da formaterne udelukker hinanden. Vil man have egentlig
- * domæneadskillelse, skal de to have hvert sit prefix inden HMAC'en — det er en ændring
- * af datamodellen og kræver godkendelse plus en migration af alle eksisterende hashes.
- * Det gøres derfor ikke her, men noteres.
  */
-export const hashKunde = hmac;
+export const hashKunde = (vaerdi) => hmac('kunde', vaerdi);
 
 /**
  * Sammenligning i konstant tid. Bruges hvor et hash sammenlignes med noget, en

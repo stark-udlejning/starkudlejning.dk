@@ -133,12 +133,20 @@ selvom feltnavnet er neutralt. Det samme gælder uddybningsfelter på afvigelser
 
 ```js
 // netlify/functions/lib/pseudonym.js
-const hmac = (v) => crypto.createHmac('sha256', process.env.PSEUDONYM_SECRET)
-                          .update(String(v).trim().toLowerCase()).digest('hex');
+const hmac = (domaene, v) =>
+  crypto.createHmac('sha256', process.env.PSEUDONYM_SECRET)
+        .update(`${domaene}:${String(v).trim().toLowerCase()}`)
+        .digest('hex');
 
-export const hashEmail = hmac;   // interne og eksterne mailadresser
-export const hashKunde = hmac;   // kundenumre
+export const hashEmail = (v) => hmac('email', v);
+export const hashKunde = (v) => hmac('kunde', v);
 ```
+
+**Domæneadskillelse er obligatorisk.** Uden prefix ville `hashEmail("580")` og
+`hashKunde("580")` give samme værdi, og en `kunde_hash` brugt mod `brugere` ville fejle
+stille i stedet for højt. Nye hashtyper får deres eget domæneprefix.
+
+Prefixet må aldrig ændres uden en migration af alle eksisterende hashes.
 
 **Login uden at gemme mailadresser:**
 
@@ -226,6 +234,22 @@ Satserne læses fra `konfiguration`-tabellen. **Ingen hardkodede satser nogen st
 I dag findes beregningen i seks implementeringer med otte sæt hardkodede tal, og
 `satser`-blokken i `priser.json` læses ikke af nogen fil. Det er årsagen til, at systemet
 giver to forskellige svar. Det gentages ikke.
+
+**Afrunding: hele kroner, pr. komponent.**
+
+Hver linje, risikotillægget og miljøbidraget rundes hver for sig til nærmeste hele krone,
+før de lægges sammen. Totalen er summen af de afrundede komponenter — ikke en afrunding af
+en uafrundet sum.
+
+Afrundingen sker **én gang pr. linje**, aldrig pr. enhed. Rundes pr. enhed og ganges
+bagefter, akkumulerer fejlen med antallet.
+
+Begrundelsen er ikke matematisk, men praktisk: platformen kører parallelt med det gamle
+system, som runder til hele kroner pr. komponent. Stemmer tallene krone for krone, er
+enhver afvigelse en rigtig fejl og ikke afrundingsstøj.
+
+Afrundingspunktet er fastholdt af en test. Flyttes det, flytter samtlige beløb på tværs af
+alle tilbud.
 
 **Historik gemmes som tal, ikke som formel.** Hvert tilbud gemmer sine beregnede totaler
 (`linjer[]`, `subtotal`, `risikotillaeg`, `miljoebidrag`, `total`) på selve tilbuddet ved

@@ -48,6 +48,16 @@ kan udskiftes ved at ændre én fil.
 `konfiguration`-tabellen, aldrig hardkodet. Det gamle system havde kæden seks steder med
 otte sæt hardkodede tal og gav derfor to forskellige svar — se `docs/kortlaegning.md` §4.1.
 
+**Afrunding: hele kroner, pr. komponent, én gang pr. linje.** Totalen er summen af de
+afrundede komponenter, aldrig en afrunding af en uafrundet sum. Der findes med vilje ingen
+valgmulighed. Platformen skal stemme krone for krone med det gamle system, så enhver
+afvigelse er en rigtig fejl og ikke afrundingsstøj. Punktet er fastholdt af en test —
+flyttes det, flytter samtlige beløb på tværs af alle tilbud.
+
+**Hash-domæner.** `hashEmail` og `hashKunde` har hvert sit prefix (`email:` / `kunde:`), så
+et kundenummer og en mailadresse med samme tekst aldrig giver samme hash. Nye hashtyper får
+deres eget domæne. Prefixet må aldrig ændres uden en migration af alle eksisterende hashes.
+
 **Falsy-zero.** Brug `??`, aldrig `||`, hvor `0` er gyldigt. `0 %` risikotillæg findes i
 virkeligheden og må ikke blive til 6,5 %.
 

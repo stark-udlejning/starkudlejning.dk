@@ -28,26 +28,36 @@ export const BEREGNING_VERSION = 2;
 const VERSIONER = new Set([1, 2]);
 
 /**
- * Afrundingsstrategier.
+ * Afrunding til hele kroner. Jf. CLAUDE.md §5.5.
  *
- * `oere`  — 2 decimaler. Standard her.
- * `krone` — hele kroner pr. komponent. Det er, hvad det gamle system gør i
- *           mail/tilbud-mail.js, vis-tilbud.html og dashboard_v2.html
- *           (`Math.round(...)` på hvert beløb).
+ * Hver komponent — linjens nettobeløb, risikotillægget, miljøbidraget — rundes hver
+ * for sig, og totalen er summen af de AFRUNDEDE komponenter, aldrig en afrunding af
+ * en uafrundet sum.
  *
- * Rundingen er IKKE fastlagt i CLAUDE.md §5.5. Den er derfor eksplicit her i stedet
- * for at blive gættet et sted inde i en formel. Skal nye tilbud stemme krone for krone
- * med gamle, er `krone` det rigtige valg — det er en beslutning for produktejeren,
- * ikke for denne fil. Se PR-beskrivelsen.
+ * Afrundingen sker én gang pr. linje, aldrig pr. enhed: rundes pr. enhed og ganges
+ * bagefter, akkumulerer fejlen med antallet.
+ *
+ * Der findes med vilje ingen valgmulighed her. Platformen kører parallelt med det
+ * gamle system, som runder på præcis denne måde; stemmer tallene krone for krone, er
+ * enhver afvigelse en rigtig fejl og ikke afrundingsstøj. En konfigurerbar afrunding
+ * ville være en måde at bryde det på uden at nogen opdagede det.
  */
-export const AFRUNDING = { OERE: 'oere', KRONE: 'krone' };
-
-function afrund(tal, strategi) {
+function afrund(tal) {
   if (!Number.isFinite(tal)) return 0;
-  if (strategi === AFRUNDING.KRONE) return Math.round(tal);
-  // Math.round på skaleret tal frem for toFixed — toFixed returnerer en streng og
-  // runder banker's-agtigt i visse motorer.
-  return Math.round(tal * 100) / 100;
+  return Math.round(tal);
+}
+
+/**
+ * `beløb × procent` uden unødig flydendekomma-støj.
+ *
+ * `x * pct / 100` og ikke `x * (pct / 100)`: mellemregningen `6.5 / 100` bliver
+ * 0.065, som ikke kan repræsenteres eksakt binært, og 500 × 0.065 lander på
+ * 32.499999999999996 i stedet for 32,5 — hvilket runder til 32 kr. i stedet for 33.
+ * `500 * 6.5` er derimod eksakt 3250, og / 100 giver eksakt 32,5.
+ * Med afrunding til hele kroner er det forskellen på en krone pr. linje.
+ */
+function procentAf(beloeb, pct) {
+  return (beloeb * pct) / 100;
 }
 
 /** Kaster på ikke-tal. `0` er altid en gyldig værdi — jf. CLAUDE.md §5.4. */
@@ -67,7 +77,7 @@ function kraevTal(vaerdi, navn) {
 export function beregnListepris(basispris, stigningPct) {
   const basis = kraevTal(basispris, 'basispris');
   const stigning = kraevTal(stigningPct ?? 0, 'stigningPct');
-  return basis * (1 + stigning / 100);
+  return basis + procentAf(basis, stigning);
 }
 
 /**
@@ -78,7 +88,7 @@ export function beregnListepris(basispris, stigningPct) {
 export function beregnKundepris(listepris, rabatPct) {
   const liste = kraevTal(listepris, 'listepris');
   const rabat = kraevTal(rabatPct ?? 0, 'rabatPct');
-  return liste * (1 - rabat / 100);
+  return liste - procentAf(liste, rabat);
 }
 
 /**
@@ -96,7 +106,6 @@ export function beregnKundepris(listepris, rabatPct) {
  * @param {number} satser.miljoePct    Fra `konfiguration`. 0 er gyldig og giver 0 kr.
  * @param {object} [indstillinger]
  * @param {1|2}    [indstillinger.version]   Standard: BEREGNING_VERSION.
- * @param {string} [indstillinger.afrunding] Standard: AFRUNDING.OERE.
  */
 export function beregnLinje(linje, satser, indstillinger = {}) {
   if (!linje || typeof linje !== 'object') {
@@ -110,7 +119,6 @@ export function beregnLinje(linje, satser, indstillinger = {}) {
   if (!VERSIONER.has(version)) {
     throw new RangeError(`Ukendt beregningsversion: ${version}`);
   }
-  const strategi = indstillinger.afrunding ?? AFRUNDING.OERE;
 
   // Satserne har ingen defaults. Mangler de, er det en fejl i kalderen — ikke noget
   // denne fil skal dække over med 6,5 og 3,5. Det var præcis dét, der gik galt før.
@@ -124,6 +132,9 @@ export function beregnLinje(linje, satser, indstillinger = {}) {
         linje.stigningPct
       );
 
+  // Uafrundet med vilje. Enhedsprisen er en mellemregning, ikke en komponent i
+  // totalen — rundes den her og ganges bagefter, er det netop den fejl pr. enhed,
+  // CLAUDE.md §5.5 forbyder. Det afrundede og autoritative beløb er `nettobeloeb`.
   const enhedspris = beregnKundepris(listepris, linje.rabatPct);
 
   // Version 1 ganger ikke materiel med antal. Det er ikke en pænere regel — det er
@@ -131,24 +142,26 @@ export function beregnLinje(linje, satser, indstillinger = {}) {
   const raaAntal = kraevTal(linje.antal ?? 1, 'antal');
   const antal = version === 1 ? 1 : raaAntal;
 
-  const nettobeloeb = afrund(enhedspris * antal, strategi);
+  const nettobeloeb = afrund(enhedspris * antal);
 
   const risikotillaeg = linje.risikofri === true
     ? 0
-    : afrund(listepris * (risikoPct / 100) * antal, strategi);
+    : afrund(procentAf(listepris * antal, risikoPct));
 
   // Selve forskellen mellem de to versioner: hvad miljøbidraget regnes af.
+  // Grundlaget er de allerede afrundede komponenter, så linjens tal hænger sammen.
   const miljoeGrundlag = version === 1 ? nettobeloeb : nettobeloeb + risikotillaeg;
-  const miljoebidrag = afrund(miljoeGrundlag * (miljoePct / 100), strategi);
+  const miljoebidrag = afrund(procentAf(miljoeGrundlag, miljoePct));
 
   return {
-    listepris: afrund(listepris, strategi),
-    enhedspris: afrund(enhedspris, strategi),
+    listepris,
+    enhedspris,
     antal: raaAntal,
     nettobeloeb,
     risikotillaeg,
     miljoebidrag,
-    total: afrund(nettobeloeb + risikotillaeg + miljoebidrag, strategi)
+    // Summen af de afrundede komponenter — ikke en afrunding af en uafrundet sum.
+    total: nettobeloeb + risikotillaeg + miljoebidrag
   };
 }
 
@@ -167,14 +180,13 @@ export function beregnTilbud(tilbud, satser, indstillinger = {}) {
     throw new TypeError('beregnTilbud: tilbud mangler');
   }
   const version = indstillinger.version ?? BEREGNING_VERSION;
-  const strategi = indstillinger.afrunding ?? AFRUNDING.OERE;
   const miljoePct = kraevTal(satser?.miljoePct, 'satser.miljoePct');
 
-  const linjer = (tilbud.linjer ?? []).map((l) =>
-    beregnLinje(l, satser, { version, afrunding: strategi })
-  );
+  const linjer = (tilbud.linjer ?? []).map((l) => beregnLinje(l, satser, { version }));
 
-  const sum = (vaelg) => afrund(linjer.reduce((s, l) => s + vaelg(l), 0), strategi);
+  // Linjernes komponenter er allerede afrundet til hele kroner. Summen af hele tal
+  // er et helt tal, så der rundes ikke igen her.
+  const sum = (vaelg) => linjer.reduce((s, l) => s + vaelg(l), 0);
 
   const netto = sum((l) => l.nettobeloeb);
   const risikotillaeg = sum((l) => l.risikotillaeg);
@@ -182,13 +194,11 @@ export function beregnTilbud(tilbud, satser, indstillinger = {}) {
 
   const udtransport = kraevTal(tilbud.udtransport ?? 0, 'udtransport');
   const hjemtransport = kraevTal(tilbud.hjemtransport ?? 0, 'hjemtransport');
-  const transport = afrund(udtransport + hjemtransport, strategi);
+  const transport = afrund(udtransport + hjemtransport);
 
-  const transportMiljoe = version === 1
-    ? 0
-    : afrund(transport * (miljoePct / 100), strategi);
+  const transportMiljoe = version === 1 ? 0 : afrund(procentAf(transport, miljoePct));
 
-  const miljoebidrag = afrund(materielMiljoe + transportMiljoe, strategi);
+  const miljoebidrag = materielMiljoe + transportMiljoe;
 
   return {
     beregning_version: version,
@@ -197,6 +207,6 @@ export function beregnTilbud(tilbud, satser, indstillinger = {}) {
     transport,
     risikotillaeg,
     miljoebidrag,
-    total: afrund(netto + transport + risikotillaeg + miljoebidrag, strategi)
+    total: netto + transport + risikotillaeg + miljoebidrag
   };
 }

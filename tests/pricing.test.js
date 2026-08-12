@@ -4,8 +4,7 @@ import {
   beregnKundepris,
   beregnLinje,
   beregnTilbud,
-  BEREGNING_VERSION,
-  AFRUNDING
+  BEREGNING_VERSION
 } from '../netlify/functions/lib/pricing.js';
 
 // Satserne kommer altid udefra. Ingen af dem er defaults i pricing.js — det er hele
@@ -43,19 +42,17 @@ describe('beregnLinje — hele kæden', () => {
     const r = beregnLinje({ listepris: 1000, rabatPct: 20, antal: 1 }, SATSER);
 
     expect(r.listepris).toBe(1000);
-    expect(r.enhedspris).toBe(800);        // 1000 × (1 − 0,20)
-    expect(r.nettobeloeb).toBe(800);       // 800 × 1
-    expect(r.risikotillaeg).toBe(65);      // 1000 × 6,5 %
-    // Miljø af (netto + risiko) = 865 × 3,5 % = 30,275 → 30,28
-    expect(r.miljoebidrag).toBeCloseTo(30.28, 2);
-    expect(r.total).toBeCloseTo(895.28, 2);
+    expect(r.enhedspris).toBe(800);      // 1000 − 20 %
+    expect(r.nettobeloeb).toBe(800);     // 800 × 1
+    expect(r.risikotillaeg).toBe(65);    // 1000 × 6,5 %
+    expect(r.miljoebidrag).toBe(30);     // (800 + 65) × 3,5 % = 30,275 → 30
+    expect(r.total).toBe(895);           // 800 + 65 + 30
   });
 
   it('regner miljø af netto PLUS risiko, ikke af netto alene', () => {
     const r = beregnLinje({ listepris: 1000, rabatPct: 20 }, SATSER);
-    const afNettoAlene = 800 * 0.035;      // 28 — den gamle, forkerte regel
-    expect(r.miljoebidrag).not.toBeCloseTo(afNettoAlene, 2);
-    expect(r.miljoebidrag).toBeCloseTo((800 + 65) * 0.035, 2);
+    expect(r.miljoebidrag).toBe(30);     // af 865
+    expect(r.miljoebidrag).not.toBe(28); // 800 × 3,5 % — den gamle, forkerte regel
   });
 
   it('udleder listeprisen fra basispris og stigning når listepris ikke er sat', () => {
@@ -67,7 +64,54 @@ describe('beregnLinje — hele kæden', () => {
   it('risikofri linje får intet risikotillæg, men stadig miljøbidrag', () => {
     const r = beregnLinje({ listepris: 1000, rabatPct: 0, risikofri: true }, SATSER);
     expect(r.risikotillaeg).toBe(0);
-    expect(r.miljoebidrag).toBeCloseTo(1000 * 0.035, 2);
+    expect(r.miljoebidrag).toBe(35);     // 1000 × 3,5 %
+  });
+});
+
+describe('afrunding — CLAUDE.md §5.5', () => {
+  it('runder hver komponent til hele kroner', () => {
+    const r = beregnLinje({ listepris: 1000, rabatPct: 20 }, SATSER);
+    for (const n of [r.nettobeloeb, r.risikotillaeg, r.miljoebidrag, r.total]) {
+      expect(Number.isInteger(n)).toBe(true);
+    }
+  });
+
+  it('totalen er summen af de afrundede komponenter, ikke en afrundet sum', () => {
+    // Uafrundet ville linjen give 800 + 65 + 30,275 = 895,275 → 895.
+    // Her er det 800 + 65 + 30 = 895. De to falder tilfældigvis sammen, så testen
+    // asserterer identiteten frem for tallet: totalen må aldrig regnes forfra.
+    const r = beregnLinje({ listepris: 1000, rabatPct: 20 }, SATSER);
+    expect(r.total).toBe(r.nettobeloeb + r.risikotillaeg + r.miljoebidrag);
+  });
+
+  it('afrunder én gang pr. linje, aldrig pr. enhed', () => {
+    //   1 stk. → (800 + 65)   × 3,5 % = 30,275 → 30
+    //   3 stk. → (2400 + 195) × 3,5 % = 90,825 → 91
+    // Rundes der pr. enhed og ganges bagefter, giver 3 stk. 3 × 30 = 90 kr.
+    // Forskellen er en krone på denne linje og vokser med antallet.
+    const en = beregnLinje({ listepris: 1000, rabatPct: 20, antal: 1 }, SATSER);
+    const tre = beregnLinje({ listepris: 1000, rabatPct: 20, antal: 3 }, SATSER);
+
+    expect(en.miljoebidrag).toBe(30);
+    expect(tre.miljoebidrag).toBe(91);
+    expect(tre.miljoebidrag).not.toBe(en.miljoebidrag * 3);
+  });
+
+  it('rammer .5-grænsen korrekt trods flydendekomma', () => {
+    // 500 × 6,5 % er præcis 32,50 og skal runde op til 33.
+    // Regnes det som 500 × (6.5/100), giver flydendekomma 32,499999999999996,
+    // som ville runde ned til 32. Derfor regnes procenter som (x × pct) / 100.
+    const r = beregnLinje({ listepris: 500, rabatPct: 0 }, SATSER);
+    expect(r.risikotillaeg).toBe(33);
+  });
+
+  it('enhedsprisen rapporteres uafrundet — den er en mellemregning', () => {
+    // Rundes enhedsprisen og ganges bagefter, er det netop fejlen pr. enhed.
+    // Det afrundede og autoritative beløb er nettobeloeb.
+    const r = beregnLinje({ listepris: 1000, rabatPct: 33.33, antal: 3 }, SATSER);
+    expect(r.enhedspris).toBeCloseTo(666.7, 4);
+    expect(r.nettobeloeb).toBe(2000);    // round(666,7 × 3) = round(2000,1)
+    expect(Number.isInteger(r.nettobeloeb)).toBe(true);
   });
 });
 
@@ -76,26 +120,10 @@ describe('antal', () => {
     const en = beregnLinje({ listepris: 1000, rabatPct: 20, antal: 1 }, SATSER);
     const tre = beregnLinje({ listepris: 1000, rabatPct: 20, antal: 3 }, SATSER);
 
+    expect(tre.nettobeloeb).toBe(2400);
+    expect(tre.risikotillaeg).toBe(195);
     expect(tre.nettobeloeb).toBe(en.nettobeloeb * 3);
     expect(tre.risikotillaeg).toBe(en.risikotillaeg * 3);
-    // Miljøbidraget regnes af linjens samlede grundlag: (2400 + 195) × 3,5 %.
-    expect(tre.miljoebidrag).toBeCloseTo((2400 + 195) * 0.035, 2);
-  });
-
-  it('afrunder én gang pr. linje, ikke pr. enhed', () => {
-    // Reelt fund fra testkørslen, ikke en teoretisk finesse:
-    //   1 stk. → (800 + 65)   × 3,5 % = 30,275  → 30,28
-    //   3 stk. → (2400 + 195) × 3,5 % = 90,825  → 90,83
-    // 3 × 30,28 = 90,84. De to tal er IKKE ens, og linjeafrundingen er den rigtige:
-    // rundes der pr. enhed og ganges bagefter, akkumulerer fejlen med antallet.
-    // Testen fastholder valget, så en fremtidig omskrivning ikke ubemærket flytter
-    // afrundingspunktet og ændrer beløb på tværs af alle tilbud.
-    const en = beregnLinje({ listepris: 1000, rabatPct: 20, antal: 1 }, SATSER);
-    const tre = beregnLinje({ listepris: 1000, rabatPct: 20, antal: 3 }, SATSER);
-
-    expect(en.miljoebidrag).toBeCloseTo(30.28, 2);
-    expect(tre.miljoebidrag).toBeCloseTo(90.83, 2);
-    expect(tre.miljoebidrag).not.toBeCloseTo(en.miljoebidrag * 3, 2);
   });
 
   it('enhedsprisen er uændret af antal', () => {
@@ -128,7 +156,7 @@ describe('falsy-zero — CLAUDE.md §5.4', () => {
   it('0 % risiko giver 0 kr., ikke 6,5 %', () => {
     const r = beregnLinje({ listepris: 1000, rabatPct: 0 }, { risikoPct: 0, miljoePct: 3.5 });
     expect(r.risikotillaeg).toBe(0);
-    expect(r.miljoebidrag).toBeCloseTo(1000 * 0.035, 2);
+    expect(r.miljoebidrag).toBe(35);
   });
 
   it('0 % miljø giver 0 kr., ikke 3,5 %', () => {
@@ -168,6 +196,8 @@ describe('beregningsversion', () => {
   it('version 1 og 2 giver forskelligt resultat på samme input', () => {
     const v1 = beregnLinje(linje, SATSER, { version: 1 });
     const v2 = beregnLinje(linje, SATSER, { version: 2 });
+    expect(v1.total).toBe(893);    // 800 + 65 + 28
+    expect(v2.total).toBe(2686);   // 2400 + 195 + 91
     expect(v1.total).not.toBe(v2.total);
   });
 
@@ -180,26 +210,12 @@ describe('beregningsversion', () => {
 
   it('version 1 regner miljø af nettopris alene', () => {
     const v1 = beregnLinje(linje, SATSER, { version: 1 });
-    expect(v1.miljoebidrag).toBeCloseTo(800 * 0.035, 2);
+    expect(v1.miljoebidrag).toBe(28);      // 800 × 3,5 %, ikke (800 + 65) × 3,5 %
   });
 
   it('afviser en ukendt version i stedet for at gætte', () => {
     expect(() => beregnLinje(linje, SATSER, { version: 3 })).toThrow(RangeError);
     expect(() => beregnLinje(linje, SATSER, { version: 0 })).toThrow(RangeError);
-  });
-});
-
-describe('afrunding', () => {
-  it('runder til øre som standard', () => {
-    const r = beregnLinje({ listepris: 1000, rabatPct: 20 }, SATSER);
-    expect(r.miljoebidrag).toBeCloseTo(30.28, 2);
-  });
-
-  it('kan runde til hele kroner som det gamle system gør', () => {
-    const r = beregnLinje({ listepris: 1000, rabatPct: 20 }, SATSER,
-      { afrunding: AFRUNDING.KRONE });
-    expect(r.miljoebidrag).toBe(30);
-    expect(Number.isInteger(r.total)).toBe(true);
   });
 });
 
@@ -217,9 +233,18 @@ describe('beregnTilbud', () => {
     const r = beregnTilbud(tilbud, SATSER);
     expect(r.beregning_version).toBe(2);
     expect(r.linjer).toHaveLength(2);
-    expect(r.subtotal).toBe(800 * 2 + 450);          // 2050
-    expect(r.risikotillaeg).toBeCloseTo(65 * 2 + 32.5, 2);
+    expect(r.subtotal).toBe(2050);         // 1600 + 450
+    expect(r.risikotillaeg).toBe(163);     // 130 + 33
     expect(r.transport).toBe(1800);
+    expect(r.miljoebidrag).toBe(141);      // 61 + 17 + 63 (transport)
+    expect(r.total).toBe(4154);
+  });
+
+  it('alle beløb er hele kroner', () => {
+    const r = beregnTilbud(tilbud, SATSER);
+    for (const n of [r.subtotal, r.transport, r.risikotillaeg, r.miljoebidrag, r.total]) {
+      expect(Number.isInteger(n)).toBe(true);
+    }
   });
 
   it('transport har intet risikotillæg', () => {
@@ -231,7 +256,7 @@ describe('beregnTilbud', () => {
   it('version 2 lægger miljøbidrag på transporten', () => {
     const uden = beregnTilbud({ ...tilbud, udtransport: 0, hjemtransport: 0 }, SATSER);
     const med = beregnTilbud(tilbud, SATSER);
-    expect(med.miljoebidrag).toBeCloseTo(uden.miljoebidrag + 1800 * 0.035, 2);
+    expect(med.miljoebidrag).toBe(uden.miljoebidrag + 63);  // 1800 × 3,5 %
   });
 
   it('version 1 lægger ikke miljøbidrag på transporten', () => {
@@ -239,14 +264,12 @@ describe('beregnTilbud', () => {
     const udenTransport = beregnTilbud(
       { ...tilbud, udtransport: 0, hjemtransport: 0 }, SATSER, { version: 1 }
     );
-    expect(v1.miljoebidrag).toBeCloseTo(udenTransport.miljoebidrag, 2);
+    expect(v1.miljoebidrag).toBe(udenTransport.miljoebidrag);
   });
 
-  it('totalen er summen af alle dele', () => {
+  it('totalen er summen af de afrundede dele', () => {
     const r = beregnTilbud(tilbud, SATSER);
-    expect(r.total).toBeCloseTo(
-      r.subtotal + r.transport + r.risikotillaeg + r.miljoebidrag, 2
-    );
+    expect(r.total).toBe(r.subtotal + r.transport + r.risikotillaeg + r.miljoebidrag);
   });
 
   it('et tilbud uden linjer giver nul hele vejen', () => {
