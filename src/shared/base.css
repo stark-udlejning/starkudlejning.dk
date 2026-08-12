@@ -1,0 +1,133 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Reset og grundtypografi. Forudsætter tokens.css.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Ingen smooth-scroll — den kolliderer med prefers-reduced-motion og gør
+     ankernavigation langsommere på telefon. */
+}
+
+body, h1, h2, h3, h4, p, figure, blockquote, dl, dd, ul, ol {
+  margin: 0;
+  padding: 0;
+}
+
+ul[role="list"], ol[role="list"] { list-style: none; }
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-brug);
+  font-size: var(--tekst-md);
+  font-weight: var(--vaegt-normal);
+  line-height: var(--linje-normal);
+  color: var(--farve-tekst);
+  background: var(--farve-flade-svag);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Overskrifter ────────────────────────────────────────────────────────────
+   Navy, aldrig orange. Orange har 2,97:1 og består ikke AA — heller ikke i
+   store størrelser, hvor grænsen er 3:1. */
+h1, h2, h3, h4 {
+  font-weight: var(--vaegt-fed);
+  line-height: var(--linje-taet);
+  color: var(--farve-navy);
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--tekst-2xl); }
+h2 { font-size: var(--tekst-xl); }
+h3 { font-size: var(--tekst-lg); }
+h4 { font-size: var(--tekst-md); }
+
+@media (min-width: 768px) {
+  h1 { font-size: var(--tekst-3xl); }
+  h2 { font-size: var(--tekst-2xl); }
+}
+
+p { text-wrap: pretty; }
+p + p { margin-top: var(--plads-3); }
+
+small { font-size: var(--tekst-sm); }
+
+/* ── Links ───────────────────────────────────────────────────────────────────
+   Navy med understregning. Understregningen er med vilje: farve alene må ikke
+   være det eneste, der markerer et link. */
+a {
+  color: var(--farve-navy);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+a:hover { color: var(--farve-navy-moerk); text-decoration-thickness: 2px; }
+
+/* ── Fokus ───────────────────────────────────────────────────────────────────
+   Synligt fokus hele vejen igennem (designoplæg §7). :focus-visible frem for
+   :focus, så musebrugere ikke får en ring ved klik, men tastaturbrugere gør. */
+:focus-visible {
+  outline: 3px solid var(--farve-fokus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── Medier og formularer ──────────────────────────────────────────────────── */
+img, picture, svg { max-width: 100%; display: block; }
+
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Ingen hover-afhængig funktionalitet: alt, der kan tappes, har en pointer,
+   men intet er kun tilgængeligt ved hover (designoplæg §2). */
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+table { border-collapse: collapse; width: 100%; }
+
+code, kbd, samp { font-family: var(--font-tal); font-size: 0.9em; }
+
+/* Tal i tabeller og beløb skal flugte lodret. */
+.tal { font-family: var(--font-tal); font-variant-numeric: tabular-nums; }
+
+/* ── Hjælpeklasser ─────────────────────────────────────────────────────────── */
+
+/* Synlig for skærmlæsere, skjult visuelt. Bruges bl.a. til at fortælle, at et
+   kort er låst — låsen må ikke kun være et ikon (designoplæg §7). */
+.kun-skaermlaeser {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Springlink — første tabstop på hver side. */
+.spring-til-indhold {
+  position: absolute;
+  left: var(--plads-3);
+  top: calc(-1 * var(--tryk-primaer));
+  z-index: 100;
+  padding: var(--plads-3) var(--plads-4);
+  background: var(--farve-navy);
+  color: var(--farve-tekst-omvendt);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: top var(--skift);
+}
+.spring-til-indhold:focus { top: var(--plads-3); color: var(--farve-tekst-omvendt); }
+
+.indhold {
+  width: 100%;
+  max-width: var(--bredde-indhold);
+  margin-inline: auto;
+  padding-inline: var(--plads-4);
+}
+@media (min-width: 768px) {
+  .indhold { padding-inline: var(--plads-5); }
+}
