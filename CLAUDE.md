@@ -125,6 +125,9 @@ mellem dem.
 Slutbilledet er:
 
 - **To PA-flows i alt** — `SendMail` og én SharePoint-adapter. Alt andet nedlægges.
+  Én kandidat til et tredje er kendt: `SyncMedarbejderefraGraph` henter brugere fra Microsoft
+  Graph, hvilket kræver en app-registrering, vi ikke har. Den foldes ind i adapteren som en
+  operation, hvis det kan lade sig gøre — ellers bliver målet tre. Se `docs/datagrundlag.md` §4.4.
 - **SharePoint reduceres til dum lagring** af de felter, der identificerer nogen.
   Ingen logik, ingen beregning, ingen visning.
 - **Alt andet i Supabase**, hvor det kan versionsstyres, testes og reviewes.
@@ -209,7 +212,7 @@ Kundenummer, navn og kontakt bliver i SharePoint.
 - `PSEUDONYM_SECRET` må aldrig rotere uden en migration, der genberegner alle hashes.
 - Hemmeligheden ligger i Netlify env vars, aldrig i repoet, aldrig i Supabase.
 - Admin-UI kan ikke liste mailadresser fra Supabase. Den autoritative brugerliste ligger i
-  SharePoint-listen `Platformsbrugere`. Kan adapteren ikke nås, vises pseudonyme id'er.
+  SharePoint-listen **`Medarbejdere`**. Kan adapteren ikke nås, vises pseudonyme id'er.
 
 ---
 
@@ -273,9 +276,21 @@ Miljøbidrag   = (nettopris + risikotillæg) × 3,5 %      ← IKKE nettopris al
 ```
 
 Satserne læses fra `konfiguration`-tabellen. **Ingen hardkodede satser nogen steder.**
-I dag findes beregningen i seks implementeringer med otte sæt hardkodede tal, og
-`satser`-blokken i `priser.json` læses ikke af nogen fil. Det er årsagen til, at systemet
-giver to forskellige svar. Det gentages ikke.
+
+**Kæden findes i dag mindst syv steder.** Kortlægningen fandt seks implementeringer i
+frontend med otte sæt hardkodede tal; datagrundlaget fandt en syvende i PA-flowet, der
+dagligt genopbygger `Priser_Materiel` (`docs/datagrundlag.md` §6.3). Dertil har
+`priser.json` en `satser`-blok, som ingen fil læser.
+
+Den syvende regner rigtigt — det er verificeret i drift. **Pointen er ikke, at den er
+forkert, men at den kan skrives et sted, ingen reviewer, og hvor ingen test fanger en
+afvigelse.** Så længe kæden kan gentages, bliver den det, og så er det et spørgsmål om
+held, om alle syv er enige. Det gentages ikke.
+
+**`stigning%` er ikke i brug i dag.** Kilden er SharePoint-listen `Varslede prisændringer`,
+som er tom, og `priser.json` har kun `listepris` — ingen `basispris`. I praksis er
+`basispris = listepris` og `stigning = 0`. Leddet står i kæden, fordi det er den rigtige
+model, ikke fordi det bruges. `lib/pricing.js` implementerer det og har det testet.
 
 **Afrunding: hele kroner, pr. komponent.**
 
@@ -450,9 +465,33 @@ Rolleopslaget sker i Supabase, ikke i PA. Et login må aldrig afhænge af, at et
 Automate-flow svarer — er flowet nede, skal folk stadig kunne komme ind. PA må gerne bruges
 til at oprette eller berige en bruger, aldrig til at godkende et login.
 
-Navne til visning hentes fra SharePoint-listen `Platformsbrugere` (kategori C) og joines på
-`hashEmail(Email)`. Kan adapteren ikke nås, vises brugerne uden navn — det er acceptabelt og
+Navne til visning hentes fra SharePoint-listen **`Medarbejdere`** (kategori C) og joines på
+`hashEmail(Mail)`. Kan adapteren ikke nås, vises brugerne uden navn — det er acceptabelt og
 må ikke blokere siden.
+
+**Der oprettes ingen `Platformsbrugere`-liste.** `Medarbejdere` er allerede autoritativ:
+den synkroniseres dagligt fra Microsoft Graph af flowet `SyncMedarbejderefraGraph`, den er
+den liste, det nuværende login bygger på, og den rummer 3.618 rækker. En ny liste ville
+skulle holdes i sync med den og ville med sikkerhed drive fra hinanden.
+
+Adapteren læser præcis tre felter — `InternalName`, ikke visningsnavn:
+
+| `InternalName` | Type | Bruges til |
+|---|---|---|
+| `Mail` | Text | Nøgle. Hashes med `hashEmail()` og joines mod `brugere.email_hash` |
+| `DisplayName` | Text | Visningsnavn i `/admin/brugere` |
+| `AccountEnabled` | Boolean | Kun til visning. **Styrer ikke adgang** — rollen og `aktiv` ligger i Supabase |
+
+`Title` indeholder samme værdi som `Mail` og bruges ikke. `OTP` og `OTPExpiry` er det gamle
+systems felter og læses aldrig.
+
+To forhold at kende:
+
+- **Synkroniseringen sletter rækker.** Flowet opretter manglende brugere og kører derefter en
+  sletteløkke. Vi læser kun fra listen, så det er ufarligt — men skriv aldrig noget til den,
+  der skal overleve.
+- **3.618 rækker er hele STARK Group**, ikke kun Udlejning. Det svarer til den port, §7
+  beskriver, og er derfor korrekt som brugerkatalog.
 
 ### 9.4 Login-statistik
 

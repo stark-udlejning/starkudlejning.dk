@@ -15,20 +15,32 @@ Rettelser til `docs/kortlaegning.md` og `CLAUDE.md` er samlet i §8. **Ingen af 
 
 ---
 
-## 0. De ti vigtigste fund
+## 0. Sammenfatning
+
+### Det, der ændrer noget nu
 
 | # | Fund | Hvor |
 |---|---|---|
-| 1 | ⚠️ **Eksporterne i `flows/` kan ikke dateres, og mindst én er beviseligt forældet.** Alt i §4 er derfor hypotese, ikke kortlægning | **§4.4b** |
-| 2 | **`Medarbejdere` har ingen kolonne, der kan rumme et forsøgsantal** — bekræftet mod skemaet, uafhængigt af flow-eksporten | §4.3 |
-| 3 | Eksporten viser klartekstkoder uden invalidering og uden forsøgsgrænse — **ikke verificeret mod portalen** | §4.3 |
-| 4 | Eksporten viser en allowlist (`Medarbejdere`, 3.618 rækker), hvor `CLAUDE.md` §7 siger der ingen er — **ikke verificeret** | §4.3, §8 |
-| 5 | **Akademiets fremdrift ligger i `Medarbejdere_Udlejning` som 19 flade `Score_*`-kolonner** — ikke i de ni akademilister | §2 |
-| 6 | **Fire af de ni akademilister er tomme.** Hele mini-test- og kompetencemodellen er bygget, men aldrig taget i brug | §2 |
-| 7 | **Intet flow rører nogen akademiliste.** Der findes ingen automatik omkring dem overhovedet | §2 |
-| 8 | **Beregningskæden findes et syvende sted — inde i et dagligt PA-flow.** Tallene er verificeret korrekte; problemet er placeringen | §6.3 |
-| 9 | **`priser.json` i repoet er autoritativ.** `Priser_Materiel` slettes og genopbygges dagligt fra den | §6 |
-| 10 | **`Sendtilbud`s mailkald er allerede en ren `sendMail`-adapter.** Vi skal ikke bygge et nyt flow | §4.2 |
+| 1 | **`Sendtilbud`s mailkald er allerede en ren `sendMail`-adapter.** `SendMail` klones frem, bygges ikke | §4.2, `pa-flows-sendmail.md` |
+| 2 | **`Medarbejdere` bruges som brugerkatalog. `Platformsbrugere` oprettes ikke** — den ville drive fra en liste, der allerede synkroniseres dagligt fra Graph | §3.3 |
+| 3 | **`priser.json` i repoet er autoritativ.** `Priser_Materiel` slettes og genopbygges dagligt fra den. Hele priskomplekset kan flyttes til Supabase | §6 |
+| 4 | **Beregningskæden findes et syvende sted — i et dagligt PA-flow.** Tallene er verificeret korrekte i drift; problemet er, at kæden overhovedet kan skrives uden for review | §6.3 |
+| 5 | **`Tilbud` gemmer seks felter, kortlægningen troede gik tabt** — `Cc`, `Tlf`, `Kontakt`, `Fritekst`, `Vilkaar`, `YdelserJSON` | §1.3 |
+| 6 | **Tre leverandørlister mangler en rute.** Foreslået: `/vaerktoejer/leverandoerer` | §5.2 |
+| 7 | **`SyncMedarbejderefraGraph` er en reel tredje flow-kandidat** — Graph-adgang uden afløser i kode | §4.4 |
+
+### Forbehold, der gælder hele §4
+
+| # | Fund | Hvor |
+|---|---|---|
+| 8 | ⚠️ **Eksporterne i `flows/` kan ikke dateres, og mindst én er beviseligt forældet.** Alt i §4 er hypotese, ikke kortlægning. §1, §2, §3, §5 og §6 bygger på skemaerne og står fast | **§4.4b** |
+
+### Afklaret siden — ingen handling
+
+| # | Fund | Hvor |
+|---|---|---|
+| 9 | **Hele akademikomplekset er dødt** — ni lister + 19 `Score_*`-kolonner. Ingen fremdrift at migrere. `Udlejning-MiniTests`' 21 spørgsmål kan bruges redaktionelt | §2 |
+| 10 | **Det gamle OTP-flow rettes ikke** — systemet afløses, og `CLAUDE.md` §7 gælder for den nye platform. Fundene i §4.3 er historik. Ét af dem har uafhængig dækning: `Medarbejdere` har ingen kolonne, der kan rumme et forsøgsantal | §4.3 |
 
 **Tal:** 31 lister · 350 felter · 7.405 rækker i alt · 8 tomme lister · 33 flow-definitioner.
 
@@ -53,7 +65,7 @@ Rettelser til `docs/kortlaegning.md` og `CLAUDE.md` er samlet i §8. **Ingen af 
 | Liste | Rækker | Felter | Dominerende kategori | Skæbne |
 |---|---:|---:|---|---|
 | `Medarbejdere` | 3.618 | 6 | C | **Bliver** → `Platformsbrugere` (§3) |
-| `Akademi_Master` | 1.599 | 16 | A | Supabase |
+| **`Akademi_Master`** | 1.599 | 16 | — | **DØD** (§2) |
 | `Masterark_Priser` | 436 | 15 | A | **Nedlægges** (§6) |
 | `FormularAfvigelser` | 389 | 6 | C | Bliver |
 | `Priser_Materiel` | 368 | 9 | A | **Nedlægges** (§6) |
@@ -61,27 +73,27 @@ Rettelser til `docs/kortlaegning.md` og `CLAUDE.md` er samlet i §8. **Ingen af 
 | `FormularKlager` | 132 | 8 | C | Bliver |
 | `Samhandelsaftaler_Rabatter` | 103 | 33 | Blandet | Splittes (§1.3) |
 | `Kundeportaler` | 99 | 11 | C | Bliver |
-| `Medarbejdere_Udlejning` | 88 | 31 | Blandet | Splittes (§2, §3) |
+| `Medarbejdere_Udlejning` | 88 | 31 | Blandet | Splittes (§3). 19 `Score_*` er **DØD** |
 | `Leverandoer_indlejning…` | 58 | 8 | C `TVIVL` | Bliver |
 | `FormularMaskiner` | 55 | 7 | C | Bliver |
 | `Leverandoer_tilbehoer…` | 34 | 7 | C `TVIVL` | Bliver |
 | `Udlejning-Centre` | 31 | 6 | A | Supabase |
 | `Tilbud` | 29 | 27 | Blandet | Splittes (§1.3) |
 | `Opmålingsanmodninger` | 28 | 12 | C | Bliver |
-| `Udlejning-MiniTests` | 21 | 12 | A | Supabase |
-| `Udlejning-Kompetencer` | 20 | 4 | A | Supabase |
+| **`Udlejning-MiniTests`** | 21 | 12 | — | **DØD** (§2) |
+| **`Udlejning-Kompetencer`** | 20 | 4 | — | **DØD** (§2) |
 | `Besigtigelsesformular` | 15 | 10 | C | Bliver |
 | `CyclingForCancer26` | 13 | 9 | C | Bliver |
 | `Leverandoer_service…` | 11 | 8 | C `TVIVL` | Bliver |
-| `Udlejning-Læringspakker` | 6 | 12 | A | Supabase |
+| **`Udlejning-Læringspakker`** | 6 | 12 | — | **DØD** (§2) |
 | `HUB Tidsregistrering` | 2 | 9 | B | Supabase pseudonymiseret |
 | **`Initialer`** | **0** | 1 | — | **DØD** |
-| **`Udlejning-KompetenceResultater`** | **0** | 16 | — | **DØD** |
-| **`Udlejning-KompetenceScores`** | **0** | 15 | — | **DØD** |
-| **`Udlejning-Kurser`** | **0** | 7 | — | **DØD** |
-| **`Udlejning-KursusTilmeldinger`** | **0** | 9 | — | **DØD** |
+| **`Udlejning-KompetenceResultater`** | **0** | 16 | — | **DØD** (§2) |
+| **`Udlejning-KompetenceScores`** | **0** | 15 | — | **DØD** (§2) |
+| **`Udlejning-Kurser`** | **0** | 7 | — | **DØD** (§2) |
+| **`Udlejning-KursusTilmeldinger`** | **0** | 9 | — | **DØD** (§2) |
 | **`Udlejning-Medarbejdere`** | **0** | 9 | — | **DØD** |
-| **`Udlejning-MiniTestBesvarelser`** | **0** | 10 | — | **DØD** |
+| **`Udlejning-MiniTestBesvarelser`** | **0** | 10 | — | **DØD** (§2) |
 | **`Varslede prisændringer`** | **0** | 10 | — | **DØD** (§6) |
 
 **8 lister har 0 rækker.** Ingen af dem røres af noget flow. De er bygget og aldrig taget i
@@ -279,10 +291,6 @@ Se §2 og §3. Kort: 11 stamdata-felter (`field_N`, regnearks-import), 19 `Score
 |---|---|---|
 | `Udlejning-Centre` (31) | `Title`, `field_1`–`field_5` = Region (**Choice, tom værdiliste**), Telefon, Mail, Adresse, PostnummerOgBy | Afdelingsliste. Svarer til `data/afdelinger.json` (28 rækker) — **tre rækker mere her**. Mails er funktionspostkasser → A |
 | `Priser_Transport` (250) | `field_1` Kundetype, `field_2` KmFra, `field_3` KmTil, `field_4` VægtFraKg, `field_5` VægtTilKg, `field_6` Pris | Alle Number. Ren A |
-| `Udlejning-Kompetencer` (20) | `Title`, `Kategori` (**Choice**: Produkt/Drift/Kunde/System/Sikkerhed/Personlig), `Beskrivelse` (Note), `Aktiv` | Ren A |
-| `Udlejning-Læringspakker` (6) | + `Dimension` (**Choice**, 7 værdier), `Point`, `Materiale-`/`MiniTestLink` (URL), `R_x00e6_kkef_x00f8_lge` **KODET**, `Ejer` (**User**) | `Ejer` er et brugerfelt → **C** for netop det felt |
-| `Udlejning-MiniTests` (21) | `Sp_x00f8_rgsm_x00e5_l` **KODET** (Note), `SvarA`–`SvarD`, `Korrektsvar` (**Choice** A/B/C/D), `Kritisk`, `Sp_x00f8_rgsm_x00e5_lsnr` **KODET** | Ren A. **Dette er de eneste rigtige quizspørgsmål i systemet** |
-| `Akademi_Master` (1.599) | `Title` + `field_1`–`field_15` | Se §2.4 |
 
 ⚠️ `Udlejning-Centre.field_1` er en **`Choice` med tom værdiliste** i skemaet. Enten er
 valgene fjernet, eller også er feltet konverteret fra tekst. Værdierne kan ikke læses herfra.
@@ -297,217 +305,68 @@ To rækker. Værktøjet er reelt ikke i brug endnu.
 
 ---
 
-## 2. Akademiet — analysen omgjort
+## 2. Akademiet — dødt kompleks
 
-### 2.1 Konklusionen
-
-**Kortlægningens konklusion var rigtig i substansen, men forkert i begrundelsen — og
-prompt 02's præmis holder heller ikke.**
-
-Fremdrift ligger **hverken** kun i localStorage **eller** i de ni akademilister. Den ligger et
-tredje sted: **19 flade `Score_*`-tekstkolonner på `Medarbejdere_Udlejning`**.
-
-| Påstand | Status |
-|---|---|
-| "Fremdrift findes kun i localStorage" (kortlægningen §5, §6.2) | **Delvist forkert.** Akademi-sitets egen fremdrift (5 onboarding-trin) er localStorage. Men der findes 19 `Score_*`-kolonner i SharePoint |
-| "Der findes ni lister, der modsiger det" (prompt 02) | **Forkert præmis.** Fire af de ni er tomme, og ingen af de ni røres af noget flow eller nogen kode i repoerne |
-| "Akademiet har ingen quizspørgsmål" (kortlægningen §6.1) | **Forkert.** `Udlejning-MiniTests` har 21 rigtige spørgsmål med A–D-svar og facit |
-
-### 2.2 De ni lister
-
-| Liste | Rækker | Hvad den er | Rørt af flow? | Rørt af kode? |
-|---|---:|---|---|---|
-| `Akademi_Master` | 1.599 | **Maskin-/manualkatalog — ikke kursusindhold.** Se §2.4 | Nej | Nej |
-| `Udlejning-Kompetencer` | 20 | Kompetencetaksonomi (Produkt/Drift/Kunde/System/Sikkerhed/Personlig) | Nej | Nej |
-| `Udlejning-Læringspakker` | 6 | Læringsmoduler m. dimension, point, tidsforbrug, links | Nej | Nej |
-| `Udlejning-MiniTests` | 21 | **Quizspørgsmål** m. A–D og `Korrektsvar` | Nej | Nej |
-| `Udlejning-Kurser` | **0** | Kursuskatalog | Nej | Nej |
-| `Udlejning-KursusTilmeldinger` | **0** | Tilmelding + gennemførelse | Nej | Nej |
-| `Udlejning-MiniTestBesvarelser` | **0** | Enkeltbesvarelser pr. spørgsmål | Nej | Nej |
-| `Udlejning-KompetenceResultater` | **0** | Testforsøg m. delscorer og bestået/dumpet | Nej | Nej |
-| `Udlejning-KompetenceScores` | **0** | Aggregeret score pr. medarbejder × kompetence | Nej | Nej |
-
-### 2.3 Relationerne
-
-```
-Udlejning-Kompetencer (20) ──────────┐
-   ▲                                 │
-   │ Lookup                          │ Lookup
-   │                                 ▼
-Udlejning-MiniTests (21) ──Lookup──► Udlejning-Læringspakker (6)
-   │                                 ▲            ▲
-   │ Lookup                          │ Lookup     │ Lookup
-   ▼                                 │            │
-Udlejning-MiniTestBesvarelser (0) ───┘            │
-   │                                              │
-   │ Lookup "Medarbejder"                         │
-   ▼                                              │
-Medarbejdere_Udlejning (88) ◄─────────────────────┘
-                                       (KompetenceResultater.Pakke)
-
-Udlejning-Kurser (0) ──Lookup──► Udlejning-KursusTilmeldinger (0)
-                                       │ Lookup "Medarbejder"
-                                       ▼
-                                 Udlejning-Medarbejdere (0)   ← TOM
-                                       ▲
-                                       │ Lookup "Medarbejder"
-                                 Udlejning-KompetenceScores (0)
-```
-
-**Modellen er internt inkonsistent.** De tre `Medarbejder`-lookups peger tre forskellige
-steder hen:
-
-| Liste | `Medarbejder`-felt peger på | Rækker i målet |
-|---|---|---:|
-| `Udlejning-MiniTestBesvarelser` | `b017b189…` = **`Medarbejdere_Udlejning`** | 88 |
-| `Udlejning-KompetenceScores` | `285adf51…` = **`Udlejning-Medarbejdere`** | **0** |
-| `Udlejning-KursusTilmeldinger` | `285adf51…` = **`Udlejning-Medarbejdere`** | **0** |
-| `Udlejning-KompetenceResultater` | *(ingen lookup — bruger `User`-felt)* | — |
-
-To af lookuppene peger på en **tom** liste. En tilmelding kan ikke oprettes, før nogen
-befolker `Udlejning-Medarbejdere`. Det forklarer, hvorfor alle fire resultatlister er tomme:
-**modellen kan ikke bruges, som den står.**
-
-### 2.4 `Akademi_Master` er ikke en akademiliste
-
-Trods navnet. De 16 felter er:
-
-`Kategori` · `Producent` · `Produktnavn` · `Model` · `ManualFilnavn` · `ManualURL` ·
-`DatabladFilnavn` · `DatabladURL` · `ManualSharePointPath` · `DatabladSharePointPath` ·
-`FlowKlar` · `DownloadStatus` · `DownloadNote` · `SidstBehandlet` · `FlowBehandlet`
-
-Det er et **katalog over maskinmanualer og datablade** — 1.599 maskiner med producent, model
-og links til dokumentation. `FlowKlar`, `DownloadStatus` og `FlowBehandlet` er
-arbejdsmarkører for en download-automatisering, der **ikke findes blandt de 33 flows**.
-
-**Svar på prompt 02's spørgsmål:** hverken indholdsliste eller konfigurationsliste. Det er et
-**produktdatakatalog med indbygget job-kø**, som er havnet under akademi-navnet. Alle 16 felter
-er `field_N` — en regnearks-import.
-
-Kategori **A** i sin helhed. Ingen personoplysninger.
-
-### 2.5 Hvor fremdriften faktisk ligger
-
-`Medarbejdere_Udlejning` har 19 `Score_*`-kolonner, alle af typen **Text**:
-
-| Kolonne | Svarer til |
-|---|---|
-| `Score_Ny_Kultur`, `Score_Ny_Intro`, `Score_Ny_Nethire`, `Score_Ny_Hvem` | Kategorien `ny-med-udlejning` |
-| `Score_Lifte_Sikkerhed`, `Score_Lifte_Diagram`, `Score_Lifte_Manual`, `Score_Lifte_Maskiner` | `lifte` |
-| `Score_Anlaeg_Maskintype`, `Score_Anlaeg_Sikkerhed`, `Score_Anlaeg_Diagram`, `Score_Anlaeg_Manual` | `anlaegsmaskiner` |
-| `Score_Skure_Typer`, `Score_Skure_Sikkerhed`, `Score_Skure_Diagram` | `skurvogne` |
-| `Score_oekonomi_brutto`, `Score_oekonomi_faktura`, `Score_oekonomi_rep`, `Score_oekonomi_retur` | `oekonomi` |
-| `Senestopdateret` | TITLE≠INTERNAL (`Senest opdateret`) |
-
-De fem kategorier matcher **præcis** de fem kategorier i `academy-data.json`
-(`ny-med-udlejning`, `lifte`, `anlaegsmaskiner`, `skurvogne`, `oekonomi`), og fire af navnene
-matcher `ONBOARDING`-arrayet i akademiets `index.html` (`kultur`, `intro`, `nethire`,
-`sikkerhed`, `bruttoavance`).
-
-**Hvad skriver dem?** Ikke noget, jeg kan finde:
-
-- Ingen af de 33 flows nævner `Score_` eller liste-GUID'et `b017b189…`
-- Akademiets `index.html` laver præcis ét netværkskald: `fetch('data/academy-data.json')`.
-  Den skriver ingen steder hen
-- Hverken `stark-prisaftale` eller `akademi` nævner `Score_` eller `Medarbejdere_Udlejning`
-
-**Jeg kan ikke afgøre, hvad der udfylder dem.** Kandidater: manuel indtastning i
-SharePoint-UI'et, en Power App, et Forms-flow uden for de 33, eller en engangsimport fra
-regneark. `CLAUDE.md` §5.7: dette er "jeg fandt det ikke", ikke "det findes ikke".
-**Spørgsmål til Jesper — det afgør, om der er data at migrere.**
-
-### 2.6 Er fremdrift autoritativ i SharePoint eller localStorage?
-
-**Ingen af dem — de måler forskellige ting og kan ikke divergere, fordi de aldrig taler sammen.**
-
-| | localStorage (`akademi:gennemfoert`) | `Score_*` |
-|---|---|---|
-| Hvad | 5 onboarding-trin, afkrydset af brugeren | 19 scorer pr. medarbejder |
-| Hvem | Anonym browser — akademiet har intet login | Navngiven medarbejder |
-| Skrives af | `markDone()` i `index.html` | Ukendt (§2.5) |
-| Læses af | Akademiets forside | Ingenting, jeg kan finde |
-
-De to systemer har ingen forbindelse. Der er ingen synkronisering at bevare og ingen
-divergens at afstemme.
-
-### 2.7 Hvilke felter identificerer en medarbejder?
-
-| Liste | Felt | Mekanisme |
-|---|---|---|
-| `Medarbejdere_Udlejning` | `Title` | Navn eller mail som tekst — **kan ikke afgøres fra skemaet** |
-| `Udlejning-Medarbejdere` | `Title` + `Mail` | Tekst |
-| `Udlejning-KompetenceResultater` | `Medarbejder` | **`User`-felt** — bundet til AD-kontoen |
-| `Udlejning-Læringspakker` | `Ejer` | **`User`-felt** |
-| `MiniTestBesvarelser`, `KompetenceScores`, `KursusTilmeldinger` | `Medarbejder` | **Lookup** på `Title` |
-
-`User`-felterne er den hårdeste binding: de gemmer et AD-bruger-id og kan ikke pseudonymiseres
-uden at miste koblingen. **Det er de eneste to felter i hele akademikomplekset, der er
-uomgængeligt kategori C** — og begge sidder på lister med 0 og 6 rækker.
-
-### 2.8 Arkitekturvurdering — anbefaling
-
-Målt mod `CLAUDE.md` §3.0: hver liste skal kunne pege på et konkret kategori C-felt for at
-overleve.
-
-**Kursusindhold** — `Udlejning-Kurser`, `Læringspakker`, `Kompetencer`, `MiniTests`,
-`Akademi_Master`:
-
-| Liste | Kategori C-felt? | Dom |
-|---|---|---|
-| `Udlejning-Kompetencer` | Nej | **Supabase. Nedlægges** |
-| `Udlejning-MiniTests` | Nej | **Supabase. Nedlægges** |
-| `Udlejning-Kurser` | Nej — og tom | **Nedlægges uden migrering** |
-| `Akademi_Master` | Nej | **Supabase. Nedlægges** |
-| `Udlejning-Læringspakker` | **Ja: `Ejer` (User)** | Feltet er redaktionelt ejerskab, ikke persondata om en registreret. **Erstattes af `email_hash` → Supabase. Nedlægges** |
-
-**Resultater og fremdrift** — kan de fungere mod `email_hash` alene?
-
-| Liste | Kan pseudonymiseres? | Dom |
-|---|---|---|
-| `Udlejning-KompetenceScores` | Ja — `Medarbejder`-lookup → `email_hash` | **Kategori B → Supabase.** Tom, intet at migrere |
-| `Udlejning-KursusTilmeldinger` | Ja | **Kategori B → Supabase.** Tom |
-| `Udlejning-MiniTestBesvarelser` | Ja | **Kategori B → Supabase.** Tom |
-| `Udlejning-KompetenceResultater` | Ja — `User` → `email_hash` ved migrering | **Kategori B → Supabase.** Tom |
-| `Score_*` på `Medarbejdere_Udlejning` | Ja | **Kategori B → Supabase.** 88 rækker med rigtige data |
-
-**Er der felter tilbage, der kræver den identificerende værdi?**
-
-Nej. Gennemgået felt for felt findes der **intet felt i akademikomplekset, der ikke kan
-fungere mod `email_hash`**. Fremdrift skal kunne vises til den, den tilhører, og aggregeres
-for ledelsen. Begge dele virker med et hash: brugeren hasher sin egen mail ved login,
-aggregering tæller distinkte hashes.
-
-De to `User`-felter (`KompetenceResultater.Medarbejder`, `Læringspakker.Ejer`) er den eneste
-tekniske forhindring, og de løses ved at oversætte AD-id til mail **én gang under migreringen**
-og derefter hashe.
-
-> ### Anbefaling
+> **Afklaret af Jesper 2026-08-12.** Akademiet er siden bygget om. De ni akademilister og
+> de 19 `Score_*`-kolonner på `Medarbejdere_Udlejning` er **forældede og opdateres ikke
+> længere**. Jf. `CLAUDE.md` §3.00.
 >
-> **Alle ni lister nedlægges.** Ingen af dem har et felt, der begrunder ophold i SharePoint.
+> **Der er ingen fremdrift at migrere.** Akademiet på den nye platform bygges fra bunden
+> med Supabase som datalager — ingen engangsimport, ingen bagudkompatibilitet.
 >
-> Fire er tomme og kan slettes uden videre. `Akademi_Master` hører slet ikke til akademiet og
-> flyttes som produktdatakatalog. De resterende fire flyttes: indhold som A, fremdrift som B
-> mod `email_hash`.
->
-> Datamodellen fra kortlægningen §6.3 holder, men skal udvides med `minitests`,
-> `besvarelser` og `kompetencer`, da spørgsmålene faktisk findes.
->
-> Jesper beslutter.
+> Den oprindelige udgave af dette afsnit fyldte 210 linjer med relationsdiagrammer, en
+> arkitekturvurdering og en migreringsplan. Alt sammen hvilede på, at komplekset var
+> levende. Det er skåret væk. Tilbage står kun det, et opslagsværk har brug for.
 
-### 2.9 Hvad migreringen af eksisterende resultater kræver
+### 2.1 Status
 
-| Kilde | Rækker | Kræver |
+| Liste | Rækker | Status |
 |---|---:|---|
-| `Score_*` på `Medarbejdere_Udlejning` | 88 × op til 19 værdier | **Afklaring af hvad `Title` indeholder** (navn eller mail). Er det navn, skal der joines mod `Medarbejdere.DisplayName` for at få mailen, før den kan hashes. Navne er ikke unikke |
-| De fire tomme resultatlister | 0 | Intet |
-| `academy-data.json` | 25 sider, 757 blokke | Ren indlæsning, kategori A |
-| `Udlejning-MiniTests` | 21 spørgsmål | Ren indlæsning, kategori A |
-| localStorage-fremdrift | Ukendt antal browsere | Kan ikke hentes. Engangsimport ved første login, jf. prompt 01 PR 3 |
+| `Akademi_Master` | 1.599 | **DØD** |
+| `Udlejning-Kurser` | 0 | **DØD** |
+| `Udlejning-Læringspakker` | 6 | **DØD** |
+| `Udlejning-Kompetencer` | 20 | **DØD** |
+| `Udlejning-KompetenceScores` | 0 | **DØD** |
+| `Udlejning-KompetenceResultater` | 0 | **DØD** |
+| `Udlejning-KursusTilmeldinger` | 0 | **DØD** |
+| `Udlejning-MiniTests` | 21 | **DØD** — men se §2.3 |
+| `Udlejning-MiniTestBesvarelser` | 0 | **DØD** |
+| `Medarbejdere_Udlejning.Score_*` (19 kolonner) | 88 rækker | **DØD.** Kolonnerne nedlægges; resten af listen lever, se §3 |
 
-⚠️ **`Score_*` er de eneste rigtige akademidata, der findes.** 88 medarbejdere. Går de tabt,
-kan de ikke genskabes. De skal eksporteres, før nogen rører `Medarbejdere_Udlejning`.
+Alle ti nedlægges uden erstatning. Ingen af dem røres af noget flow.
 
----
+### 2.2 Lukkede spørgsmål
+
+| Spørgsmål | Svar |
+|---|---|
+| Hvad skriver `Score_*`? | **Ingenting — ikke længere.** Spørgsmålet er lukket |
+| Er fremdrift autoritativ i SharePoint eller localStorage? | Bortfaldet. Ingen af delene bruges |
+| Hvad kræver migreringen af eksisterende resultater? | **Intet.** Der er ingenting at migrere |
+| Kan de ni lister nedlægges? | Ja, alle ti poster ovenfor |
+
+### 2.3 Det eneste, der er værd at tage med videre
+
+**`Udlejning-MiniTests` indeholder 21 færdigskrevne spørgsmål** med fire svarmuligheder og
+facit (`Sp_x00f8_rgsm_x00e5_l`, `SvarA`–`SvarD`, `Korrektsvar`, `Kritisk`,
+`Sp_x00f8_rgsm_x00e5_lsnr`).
+
+De er **ikke en migrationskilde** — listen er død, og det nye akademi bygges fra bunden.
+Men spørgsmålene er skrevet af nogen med fagkendskab, og de kan spare arbejde som
+**redaktionelt udgangspunkt**, når indholdet til det nye akademi skal skrives. Notér dem som
+reference, ikke som data.
+
+### 2.4 Én rettelse, der stadig gælder
+
+Kortlægningen §6.1 konkluderede, at akademiet **ingen quizspørgsmål** havde. Det var forkert
+— de 21 findes. Rettelsen står ved magt, selvom listen er død, fordi den samme fejlslutning
+ellers kan gentage sig: konklusionen byggede på, at akademi-sitets frontend ikke havde nogen
+quiz, hvilket ikke er det samme som at der ikke fandtes spørgsmål.
+
+**`Akademi_Master` er desuden ikke en akademiliste** trods navnet. De 16 felter er et katalog
+over maskinmanualer og datablade (`Producent`, `Model`, `ManualURL`, `DatabladURL`,
+`DownloadStatus`). Uden betydning nu, hvor den er død — men værd at vide, hvis nogen falder
+over navnet og tror, der ligger kursusindhold.
+
 
 ## 3. De tre medarbejderlister
 
@@ -726,33 +585,16 @@ bør være et bevidst valg. **Spørgsmål til Jesper.**
 
 > ### Hvad det betyder for anbefalingen
 >
-> **Anbefalingen ændrer sig ikke, og den afhænger ikke af, om fundene holder.**
+> **Afgjort af Jesper 2026-08-12: det gamle OTP-flow rettes ikke. Systemet afløses.**
 >
-> Begge flows nedlægges, og OTP-logikken bygges i `lib/auth.js` efter §7 som skrevet.
-> Er det kørende mønster bedre end eksporten antyder, er den nye implementering stadig
-> den, der skal bruges — den er testbar, versionsstyret og reviewet.
+> `CLAUDE.md` §7 gælder for den **nye** platform. Den er ikke og har aldrig været en
+> beskrivelse af, hvad de to gamle flows gør — Jesper har rettet §7, så det nu fremgår
+> eksplicit.
 >
-> **Det, der ændrer sig, er hastesagen.** Den oprindelige udgave anbefalede at rykke
-> OTP-rettelsen frem foran alt andet (§7, trin `0b`), fordi klartekstkoder uden
-> forsøgsgrænse er et problem i drift *nu*. Den prioritering hvilede på eksporten.
-> **Den bør ikke handles på, før nogen har åbnet de to flows i portalen** — det tager
-> et par minutter og afgør, om trin `0b` er akut eller helt kan udgå.
->
-> Én ting står dog fast uanset: **der kan ikke tælles forsøg i `Medarbejdere`**, fordi
-> kolonnen ikke findes. Findes der ingen tæller andetsteds, er en 6-cifret kode med
-> 10 minutters levetid udsat for uendelig gætning.
-
-#### Konkret tjekliste til portalen
-
-Fire ting at kigge efter, i `OTPLogin-Intern` og `OTPVerify-Intern`:
-
-1. I `OTPLogin` → `Update_item`: står der stadig `item/OTP = outputs('Compose')`, eller er der
-   kommet en hash-funktion ind?
-2. I `OTPVerify` → ja-grenens `Update_item`: sættes `item/OTP` til tom, eller sættes stadig kun
-   `AccountEnabled`?
-3. Findes der nogen tæller — en ny kolonne, en variabel, et opslag i en anden liste?
-4. Sættes `AccountEnabled = True` stadig i `OTPLogin` (altså ved anmodningen), eller er det
-   flyttet til `OTPVerify` alene?
+> Begge flows nedlægges sammen med resten af `/samhandel`-laget, og OTP-logikken bygges
+> i `lib/auth.js` efter §7 som skrevet. **Fundene ovenfor er dermed historik, ikke en
+> opgave.** De står her, fordi de dokumenterer, hvad der ikke skal reproduceres — og
+> fordi et af dem (forsøgstælleren) er den eneste OTP-observation med uafhængig dækning.
 
 ### 4.4 `SyncMedarbejderefraGraph` — det tredje flow
 
@@ -889,15 +731,44 @@ udføres, særlige forhold, el-maskiner.
 `Besigtigelsesformular` er den ældre generation — sandsynligvis en Microsoft Forms-formular,
 som forklarer de kodede feltnavne. **Nedlægges efter eksport af de 15 rækker.**
 
-### 5.2 Fire lister mangler en rute
+### 5.2 Ruteforslag
 
-| Liste | Rækker | Forslag |
+**Forslag, ikke beslutninger.** Ruterne er ikke placeret i `CLAUDE.md` §1 — det er Jespers.
+
+#### De tre leverandørlister → **`/vaerktoejer/leverandoerer`**
+
+| Liste | Rækker | Indhold |
 |---|---:|---|
-| De tre `Leverandoer_*` | 103 i alt | **`/vaerktoejer/leverandoerer`** — et opslagsværk, pladspersonalet i dag ikke har adgang til uden for SharePoint |
-| `Varslede prisændringer` | 0 | Hører under **`/admin/priser`**. Se §6.4 |
+| `Leverandoer_indlejning_af_maskiner_materiel` | 58 | Aftale, materiel, kontakt øst/vest, telefon, mail, hjemmeside |
+| `Leverandoer_tilbehoer_reservedele` | 34 | Hvilke dele, kontaktperson, telefon, mail, prisliste |
+| `Leverandoer_service_aarseftersyn` | 11 | Leverandørnavn, telefon øst/vest, kontaktperson, mail, link |
 
-`Initialer` (0 rækker, ét tekstfelt, ingen læsere) kan ikke afgøres. **Nedlægges som DØD**,
-med mindre Jesper kender formålet.
+**Hvorfor `/vaerktoejer` og ikke `/admin`:** de tre er **opslagsværk til dagligt brug**, ikke
+ledelsesdata. Den, der står på pladsen med en maskine, der skal have årseftersyn, skal kunne
+slå leverandøren op — det er samme slags handling som at bestille mærkater eller lave en
+rekvisition. Under `/admin` ville de være utilgængelige for netop dem, der har brug for dem.
+
+**Hvorfor én rute og ikke tre:** de tre lister har næsten samme felter (navn, kontaktperson,
+telefon, mail) og adskiller sig kun ved, hvad leverandøren kan levere. Én side med et filter
+på kategori er både mindre at bygge og lettere at bruge end tre næsten ens sider.
+
+**Adgang:** Intern. Alle tre er kategori C `TVIVL` (navngivne kontaktpersoner), så de læses
+via adapteren og vises kun bag login.
+
+⚠️ **Én ting bør afklares først:** er kontakterne fysiske personer eller funktionspostkasser?
+Er de funktionspostkasser, falder listerne til kategori A og kan flyttes til Supabase. Det
+kan ikke afgøres fra skemaet — se §9.2.
+
+#### `Varslede prisændringer` → **ingen rute**
+
+**Afgjort af Jesper 2026-08-12: listen får ingen rute.** Den er tom og nedlægges.
+Konsekvensen for beregningskæden — at `stigning%` dermed ikke har nogen kilde — er beskrevet
+i §6.4.
+
+#### `Initialer` → **ingen rute**
+
+**Afgjort af Jesper 2026-08-12: kræver ingen afklaring, får ingen rute.** 0 rækker, ét
+tekstfelt, ingen læsere. Nedlægges.
 
 ---
 
@@ -1058,72 +929,92 @@ kundekobling i sig selv. De flyttes med `kunde_hash` som nøgle.
 ## 7. Revideret rækkefølge
 
 `CLAUDE.md` §11 sætter `/akademi` først, med begrundelsen *"ingen kategori C, ingen PA, ingen
-beregning"*.
-
-**Den begrundelse holder — bedre end forventet.** Datagrundlaget bekræfter den:
+beregning"*. **Den begrundelse holder — og efter afklaringen af akademikomplekset holder den
+bedre end da den blev skrevet.**
 
 | §11's præmis | Datagrundlaget |
 |---|---|
-| Ingen kategori C | ✅ Kun to `User`-felter i hele komplekset, begge på lister med 0 og 6 rækker |
-| Ingen PA | ✅ **Bekræftet: intet af de 33 flows rører nogen akademiliste** |
+| Ingen kategori C | ✅ |
+| Ingen PA | ✅ Intet af de 33 flow-eksporter rører nogen akademiliste (⚠️ negativ påstand, se §4.4b) |
 | Ingen beregning | ✅ |
-| Ingen SharePoint | ⚠️ **Delvist forkert** — 88 rækker `Score_*` findes |
+| Ingen SharePoint | ✅ **Nu entydigt.** De ni lister og `Score_*` er døde og migreres ikke |
 
-Det eneste, der ændrer sig, er at `/akademi` nu har **rigtige data at migrere**: 88
-medarbejderes fremdrift og 21 quizspørgsmål. Det gør den lidt større, men ikke mere risikabel
-— tværtimod er den nu det eneste sted, hvor hele mønstret (indhold A + fremdrift B mod
-`email_hash`) kan bevises på ægte data uden at røre en eneste kunde.
+`/akademi` har hverken data at migrere eller et gammelt system at holde i live. Den bygges fra
+bunden, og den er dermed stadig det billigste sted at bevise hele mønstret — auth,
+`email_hash`, Supabase, RLS, designsystem — uden at røre en kunde eller en kollega.
 
-> ### Anbefaling: behold `/akademi` først, men flyt to ting frem
+> ### Anbefaling: rækkefølgen i §11 fastholdes uændret
 >
-> | # | Trin | Ændring ift. §11 |
+> | # | Trin | Bemærkning |
 > |---|---|---|
-> | **0a** | **Eksportér `Score_*` fra `Medarbejdere_Udlejning`** (88 rækker) | **NY.** De er de eneste akademidata, der findes, og intet flow beskytter dem |
-> | **0b** | **Åbn `OTPLogin-Intern` og `OTPVerify-Intern` i portalen** og afgør, om §4.3's fund gælder | **ÆNDRET.** Var: "ret OTP-mønstret, det haster". Den prioritering byggede på eksporten, som er upålidelig (§4.4b). Tjekket tager minutter og afgør, om rettelsen er akut eller kan udgå |
-> | 1 | Fundament + `/akademi` | Uændret |
-> | 2 | `/kunde/*` + dokumentadgang | Uændret |
+> | 1 | Fundament + `/akademi` | Uændret. Bygges fra bunden; `Udlejning-MiniTests`' 21 spørgsmål kan bruges redaktionelt (§2.3) |
+> | 2 | `/kunde/*` + dokumentadgang | Uændret. Lukker den største eksisterende eksponering |
 > | 3 | `/rapportering/*` + `/admin`-ledelsesvisning | Uændret. `FormularEmailGateway` er allerede tæt på en adapter |
 > | 4 | `/vaerktoejer/*` | + **`/vaerktoejer/leverandoerer`** (§5.2) |
-> | 5 | `/hub` | **Kunne rykkes frem.** 2 rækker, 1 flow, 0 betingelser — den simpleste app i hele systemet |
+> | 5 | `/hub` | **Kunne rykkes frem.** 2 rækker, 1 flow, 0 betingelser — den simpleste app i systemet |
 > | 6 | `/samhandel` | Uændret. `Prisaftale`-flowet har 152 expressions og 5 betingelser |
 >
-> Kriteriet er risiko. `0b` er med, fordi det er den eneste post på listen, hvor **ingenting
-> at gøre også er en risiko**.
+> **De to ekstra trin, den tidligere udgave foreslog, er begge udgået:**
+>
+> - `0a` **eksport af `Score_*`** — udgår. Kolonnerne er døde; der er intet at redde.
+> - `0b` **verifikation og rettelse af det gamle OTP-mønster** — udgår. Systemet afløses,
+>   og `CLAUDE.md` §7 gælder for den nye platform, ikke som en beskrivelse af det gamle.
+>   Fundene i §4.3 er dermed historik, ikke en opgave.
 
----
 
-## 8. Rettelser til `docs/kortlaegning.md` og `CLAUDE.md`
+## 8. Rettelser — status
 
-**Ingen af filerne er ændret.** Listen afventer godkendelse.
+**Alle 17 rettelser er godkendt af Jesper og indarbejdet** i `docs/kortlaegning.md` og
+`CLAUDE.md` (prompt 03 §2). Tabellen er nu et kvitteringsspor, ikke en anmodning.
 
 ### 8.1 `CLAUDE.md`
 
-| # | Sted | Rettelse |
-|---|---|---|
-| 1 | **§7, "Ingen allowlist"** | Eksporten viser en allowlist: `OTPLogin-Intern` kræver præcis ét match i `Medarbejdere` (3.618 rækker). Fjernes den, er det en **udvidelse** af adgangen, ikke status quo. ⚠️ **Ikke verificeret mod portalen** (§4.3) |
-| 2 | **§7, "Mønstret er i drift og ændres ikke"** | Formuleringen bør rettes uanset udfaldet af verifikationen: §7 beskriver et **mål**, og at påstå at nutiden allerede opfylder det gør reglen uefterprøvelig. Om de seks konkrete afvigelser gælder, kan først afgøres i portalen (§4.3) |
-| 3 | **§9.3, `Platformsbrugere`** | Listen findes ikke og bør ikke oprettes. `Medarbejdere` er allerede autoritativ, synkroniseret dagligt fra Graph og har `Mail` + `DisplayName` (§3.3) |
-| 4 | **§5.5, beregningskæden** | "seks implementeringer" er for lavt. Der er mindst **syv**, og den syvende ligger i et PA-flow uden for repoet. Den regner rigtigt — men uden for review og test (§6.3) |
-| 5 | **§5.5, `stigning%`** | Leddet har aldrig været i brug. Kilden (`Varslede prisændringer`) er tom, og `priser.json` har ingen `basispris` (§6.4) |
-| 6 | **§3.0, "to flows i alt"** | `SyncMedarbejderefraGraph` er en reel tredje kandidat med Graph-adgang uden afløser (§4.4). Enten foldes den ind i adapteren, eller også bliver målet tre |
-| 7 | **§11, rækkefølge** | `/akademi` rører **ikke** SharePoint — bekræftet. Men den har 88 rækker rigtige data, der skal eksporteres først (§7) |
+| # | Sted | Rettelse | Status |
+|---|---|---|---|
+| 1 | §7, "Ingen allowlist" | Det gamle flow havde en allowlist | ✅ **Rettet af Jesper.** §7 er omskrevet, så det gamle flow eksplicit *ikke* er referencen. Ikke rørt af mig |
+| 2 | §7, "Mønstret er i drift og ændres ikke" | Formuleringen gjorde reglen uefterprøvelig | ✅ **Rettet af Jesper.** Se ovenfor |
+| 3 | §9.3, `Platformsbrugere` | Listen findes ikke og oprettes ikke | ✅ **Indarbejdet.** §4 og §9.3 peger nu på `Medarbejdere` med faktiske `InternalName`-værdier |
+| 4 | §5.5, beregningskæden | "seks implementeringer" var for lavt | ✅ **Indarbejdet** som mindst syv. ⚠️ **Formuleret anderledes end prompt 03 §2 bad om** — se note nedenfor |
+| 5 | §5.5, `stigning%` | Leddet har aldrig været i brug | ✅ **Indarbejdet** |
+| 6 | §3.0, "to flows i alt" | `SyncMedarbejderefraGraph` er en tredje kandidat | ✅ **Indarbejdet** |
+| 7 | §11, rækkefølge | Byggede på, at akademiet havde data at migrere | ✅ **Bortfaldet.** Komplekset er dødt; rækkefølgen står uændret (§7) |
+
+> ### ⚠️ Afvigelse fra prompt 03 §2 — regelændring, læs denne
+>
+> Prompt 03 §2 beder om, at `CLAUDE.md` §5.5 skal nævne *"den daglige flow-variant med
+> miljøbidrag af listepris og total som `listepris × 1.1`"*.
+>
+> **Det er ikke skrevet ind**, fordi Jesper samtidig har oplyst, at prisflowet er
+> **verificeret korrekt i drift** — de to formler stammer fra en forældet eksport (§6.3).
+> At skrive dem ind i den bindende fil ville føre en tilbagetrukket påstand videre som fakta.
+>
+> §5.5 nævner i stedet, at kæden findes mindst syv steder, at den syvende ligger uden for
+> repoet, og at den **regner rigtigt** — men uden for review og test. Pointen om duplikering
+> står; den forkerte formel gør ikke.
+>
+> Jf. `CLAUDE.md`: *"Er noget i en prompt i konflikt med denne fil, så stop og spørg."*
+> Her var konflikten mellem prompten og en senere oplysning fra produktejeren selv.
 
 ### 8.2 `docs/kortlaegning.md`
 
+Alle ti er indarbejdet og markeret **RETTET** i teksten. Dokumentet har desuden fået en
+advarsel øverst om, at `docs/datagrundlag.md` er autoritativ ved uenighed.
+
 | # | Sted | Rettelse |
 |---|---|---|
-| 8 | **§2.3**, "felter der gemmes ikke i dag" | **Forkert.** `Cc`, `Tlf`, `Kontakt`, `Fritekst`, `Vilkaar` og `YdelserJSON` findes alle som kolonner på `Tilbud`. `docs/pa-flows.md`'s liste var forældet |
-| 9 | **§3.1**, kolonnenavne på `Samhandelsaftaler_Rabatter` | Mindst 11 navne gættet forkert (§1.3). De rigtige bruger `_`-separatorer: `Rabat_JordOgAnlaeg`, `Forventet_Omsaetning`, `Saelger_Navn` |
-| 10 | **§3.1**, "Rækker: Ukendt" | Nu kendt for alle 31 lister. `Tilbud` = 29, `Samhandelsaftaler_Rabatter` = 103, `Kundeportaler` = 99 |
-| 11 | **§5 og §6.2**, akademiets fremdrift | **Ufuldstændigt.** Ud over localStorage findes 19 `Score_*`-kolonner på `Medarbejdere_Udlejning` med 88 rækker (§2.5) |
-| 12 | **§6.1**, "ingen quizspørgsmål" | **Forkert.** `Udlejning-MiniTests` har 21 spørgsmål med A–D-svar og facit (§2.2) |
-| 13 | **§6.3**, foreslået datamodel | Holder, men mangler `minitests`, `besvarelser` og `kompetencer` |
-| 14 | **§3.1**, `Masterark_Priser` "afklar om listen bruges" | **Afklaret: nej.** Intet af de 33 flows rører den (§6.3) |
-| 15 | **§3.3**, `tilbud-status` dødt | **Bekræftet** af definitionen |
-| 16 | **§4.3**, `lastvogn` uden modtagende kolonne | **Bekræftet.** Der findes ingen `Rabat_Lastvognslifte` |
-| 17 | **§8.2, spørgsmål 7** | Besvaret: felterne persisteres allerede. Spørgsmålet bortfalder |
+| 8 | §2.3 | Seks felter anført som "gemmes ikke i dag" findes alle som kolonner |
+| 9 | §3.1 | Mindst 11 kolonnenavne på `Samhandelsaftaler_Rabatter` gættet forkert |
+| 10 | §3.1 | Alle "Rækker: Ukendt" er nu udfyldt |
+| 11 | §5, §6.2 | Akademiets fremdrift — nu bortfaldet, komplekset er dødt |
+| 12 | §6.1 | "ingen quizspørgsmål" var forkert; de 21 findes |
+| 13 | §6.3 | Datamodellen mangler spørgsmål og besvarelser |
+| 14 | §3.1 | `Masterark_Priser` — afklaret: ingen flows rører den |
+| 15 | §3.3 | `tilbud-status` dødt — bekræftet |
+| 16 | §4.3 | `Rabat_Lastvognslifte` findes ikke — bekræftet |
+| 17 | §8.2 spm. 7 | Bortfaldet: felterne persisteres allerede |
 
 ---
+
 
 ## 9. Dækning
 
@@ -1137,22 +1028,29 @@ medarbejderes fremdrift og 21 quizspørgsmål. Det gør den lidt større, men ik
 | `stark-udlejning/stark-prisaftale` | Gennemsøgt for `Score_`, `Medarbejdere_Udlejning`, prisreferencer |
 | `docs/kortlaegning.md`, `CLAUDE.md` | Læst fuldt, krydset mod skemaer og flows |
 
-### 9.2 Ikke afgjort
+### 9.2 Åbne spørgsmål — reduceret
 
-| Ting | Hvorfor |
+Den oprindelige liste havde ti punkter. Fem er bortfaldet, fordi akademikomplekset er dødt
+eller fordi Jesper har afgjort dem. **Fem står tilbage, formuleret som ja/nej-spørgsmål.**
+
+| # | Spørgsmål | Hvorfor det betyder noget |
+|---|---|---|
+| **1** | **Er kontaktpersonerne i de tre `Leverandoer_*`-lister fysiske personer** (frem for funktionspostkasser som `salg@leverandoer.dk`)? | Ja → listerne bliver i SharePoint som kategori C. Nej → de flyttes til Supabase som kategori A. Afgør 103 rækker og `/vaerktoejer/leverandoerer` (§5.2) |
+| **2** | **Indeholder `Medarbejdere_Udlejning.Title` en mailadresse** (frem for et navn)? | Ja → listens 88 rækker stamdata kan kobles direkte på `email_hash`. Nej → der skal joines mod `Medarbejdere.DisplayName` først, og navne er ikke unikke (§3) |
+| **3** | **Er `flows/`-eksporterne trukket samtidig med `sp-skemaer.json`?** | Nej → hele §4 er hypotese, og eksporterne bør trækkes igen med dato. Prisflowet viser, at mindst én er forældet (§4.4b) |
+| **4** | **Er der flere end 33 flows i Power Automate?** | Ja → alle negative påstande i §4 er ufuldstændige, herunder "intet flow rører X" (§4.4b) |
+| **5** | **Skal `stigning%` blive i beregningskæden**, nu hvor `Varslede prisændringer` nedlægges uden erstatning? | Nej → leddet fjernes fra `CLAUDE.md` §5.5 og fra `lib/pricing.js`. Ja → der skal en ny kilde til prisvarsling (§6.4) |
+
+**Bortfaldet siden sidst:**
+
+| Spørgsmål | Hvorfor det er væk |
 |---|---|
-| **Hvad skriver `Score_*`?** | Intet flow, ingen kode i de repoer, jeg har adgang til. Kan være en Power App, en Forms-integration uden for `flows/`, eller manuel indtastning. **"Jeg fandt det ikke" — ikke "det findes ikke"** |
-| **Hvad `Medarbejdere_Udlejning.Title` indeholder** | Navn eller mail. Afgør, om `Score_*` kan hashes direkte, eller om der skal joines først. Kræver et kig på rækkerne |
-| **`Udlejning-Centre.field_1` (Region)** | `Choice` med tom værdiliste i skemaet. Værdierne kan ikke læses |
-| **Hvornår `priser-array.json` sidst blev regenereret** | Begge prisfiler blev sidst committet i samme commit (`516cf89`, 2026-08-07), så git kan ikke vise, hvornår de kom ud af trit |
-| **Om leverandørkontakter er personer eller funktionspostkasser** | Afgør C vs. A for tre lister. Kræver et kig på rækkerne |
-| **`Initialer`s formål** | 0 rækker, ét felt, ingen læsere |
-| **`flows/test`** | Pladsholderfil på 1 byte |
-| **Om de 8 tomme lister nogensinde har haft data** | `ItemCount` viser nutiden. Der er intet i skemaer eller flows, der kan afgøre historikken |
-| **Faktisk rækkeindhold i alle 31 lister** | Jeg har haft skemaer og rækketal, aldrig data. Ingen påstand i dette dokument bygger på en læst række |
-| **Om nogen af de 33 flow-eksporter svarer til det, der kører** | Ingen Power Automate-adgang i sessionen; jeg har søgt efter et værktøj og fundet intet. Eksporterne bærer ingen tidsstempler, og mindst én er bevist forældet. Se §4.4b |
-| **Hvor mange flows der findes i portalen i alt** | Er der flere end de 33, er alle negative påstande i §4 ufuldstændige — herunder "intet flow rører nogen akademiliste" |
-| **De 5 øvrige flows uden detailgennemgang** | `Acceptertilbud`, `Bestillingaf*`, `CyclingForCancer*`, `HUBTidsregistrering`, `Kundeportaler*` — klassificeret ud fra actions, connectors og liste-GUID'er, ikke linje for linje |
+| Hvad skriver `Score_*`? | Akademiet er dødt — svaret er "ingenting, ikke længere" |
+| Har de 8 tomme lister haft data? | Uden betydning; ingen af dem migreres |
+| `Udlejning-Centre.field_1` (Region) med tom `Choice`-værdiliste | Kan aflæses af de 31 rækker, når listen migreres. Ikke en beslutning |
+| `Initialer`s formål | Afgjort: ingen rute, nedlægges |
+| Hvornår `priser-array.json` sidst blev regenereret | Uden betydning; begge filer bortfalder med `/admin/priser` |
+
 
 ### 9.3 Påstande, jeg ikke kan stå inde for
 

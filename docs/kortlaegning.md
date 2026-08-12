@@ -3,9 +3,33 @@
 Grundlag for datamodel og ruter i den samlede platform. Skrevet efter CC-prompt 00.
 Klassificeringen følger de tre datakategorier i platformens `CLAUDE.md` §3.
 
-**Herkomst:** oprindeligt leveret i `stark-prisaftale` PR #132. Kopieret hertil uændret,
-bortset fra to rettelser markeret i teksten (§0.3 og §8.2 spørgsmål 3), hvor den
-oprindelige konklusion om `afvigelsesrapportering` var forkert. Jf. `CLAUDE.md` §5.7.
+**Herkomst:** oprindeligt leveret i `stark-prisaftale` PR #132.
+
+> ### ⚠️ Dokumentet er delvist overhalet — læs `docs/datagrundlag.md` ved siden af
+>
+> Kortlægningen blev skrevet **uden adgang til SharePoint-skemaerne og flow-definitionerne**.
+> Kolonnenavne, rækketal og flow-adfærd er derfor udledt baglæns af frontend-kode. Da de
+> faktiske skemaer siden kom til, viste flere af de udledninger sig forkerte.
+>
+> **`docs/datagrundlag.md` er autoritativ, hvor de to er uenige.**
+>
+> Rettelser indarbejdet i denne fil, alle markeret **RETTET** i teksten:
+>
+> | Sted | Hvad der var forkert |
+> |---|---|
+> | §0.3, §8.2 spm. 3 | `afvigelsesrapportering` blev antaget ikke at findes. Den er i drift |
+> | §2.3 | Seks felter anført som "gemmes ikke i dag" findes alle som kolonner på `Tilbud` |
+> | §3.1 | Mindst 11 kolonnenavne på `Samhandelsaftaler_Rabatter` gættet forkert |
+> | §3.1 | Alle "Rækker: Ukendt" er nu kendte |
+> | §3.1 | `Masterark_Priser`: afklaret, ingen flows rører den |
+> | §3.1 | `Platformsbrugere` oprettes ikke; `Medarbejdere` bruges |
+> | §3.1 | `TilbudImport` findes ikke blandt de 31 lister |
+> | §4.3 | `Rabat_Lastvognslifte` bekræftet fraværende |
+> | §6 | Hele akademiafsnittet — komplekset er dødt, og to konklusioner var forkerte |
+>
+> **Uændret og stadig gyldigt:** §1 (inventar), §4 (duplikeret logik), §5 (localStorage),
+> §7 (eksterne afhængigheder) og §8.1 (sikkerhedsfund). De bygger på repokoden, ikke på
+> gætværk om SharePoint.
 
 **Status:** Ingen kode ændret. Ingen eksisterende repoer rørt. Ingen sites deployet eller
 ændret.
@@ -246,20 +270,20 @@ Dette er efter min vurdering det vigtigste resultat af §1.
 | `kundenr` / `Kundenr` | intern | Formular / Nethire | **C** | SharePoint |
 | `sagsnr` / `Sagsnr` | intern | Formular | **C** `TVIVL` | SharePoint. **Begrundelse:** kundens eget sagsnummer kan indeholde navne |
 | `to` / `Til` | intern, mail | Formular — kundemail | **C** | SharePoint |
-| `cc` | intern | Formular | **C** | **Gemmes ikke i dag** — kun i mailen |
+| `cc` | intern | Formular | **C** | **RETTET** — findes som kolonne `Cc` |
 | `from` / `Fra` | intern, dashboard | Formular, **frit redigerbar** | **C** | SharePoint |
 | `saelger` / `Saelger` | intern, dashboard | Formular | **C** | SharePoint |
-| `tlf` | intern, mail | Formular | **C** | Gemmes ikke i dag |
-| `kontakt` | intern, mail | Formular — kontaktpersonens navn | **C** | Gemmes ikke i dag |
+| `tlf` | intern, mail | Formular | **C** | **RETTET** — findes som kolonne `Tlf` |
+| `kontakt` | intern, mail | Formular — kontaktpersonens navn | **C** | **RETTET** — findes som kolonne `Kontakt` |
 | `udlob` / `Udlob`, `opfolgning` / `Opfolgning` | intern, dashboard | Formular | A | Supabase, koblet på tilbuds-ID |
 | `periode` / `Periode`, `Lejeperiode` | intern | Dropdown/fritekst | A | Supabase |
 | `risiko` / `Risiko` | intern, alle | Dropdown, default 6,5 | A | Supabase |
 | `beregning` | intern, mail, vis-tilbud, dashboard | Konstant `2` | A | Supabase |
-| **`fritekst`** | intern, mail | **Sælgerens frie besked til kunden** | **C** | **Gemmes ikke i dag** |
-| **`vilkaar`** | intern, mail | **Fritekst, betingede omkostninger** | **C** | **Gemmes ikke i dag** |
+| **`fritekst`** | intern, mail | **Sælgerens frie besked til kunden** | **C** | **RETTET** — findes som kolonne `Fritekst` |
+| **`vilkaar`** | intern, mail | **Fritekst, betingede omkostninger** | **C** | **RETTET** — findes som kolonne `Vilkaar` |
 | `produkter[]` → `MaskinerJSON` | intern, vis-tilbud, mail, dashboard | Produktvalg | A | Supabase |
 | `produkter[].{uid,name,spec,nettopris,listepris,rabatPct,antal,risikoNull,friVare,masternr,leje,unit,altPris,periodeStart,periodeEnd,chargeDays,totalDays,weekendDays,weekendFree}` | samme | Produktvalg | A | Supabase |
-| `ydelser[]` | intern, mail | Ydelseslinjer | A | **Gemmes ikke i dag** |
+| `ydelser[]` | intern, mail | Ydelseslinjer | A | **RETTET** — findes som kolonne `YdelserJSON` |
 | `tilvalg[]` | intern, mail | Ældre form af `ydelser` | A | **Gemmes ikke i dag** — dubleret felt, se §4 |
 | `transporter[].{navn,fra,til,ud,hjem}` | intern, mail | Ruteberegning | **C** `TVIVL` | SharePoint. **Begrundelse:** `til` er kundens leveringsadresse |
 | `udtransport` / `Udtransport`, `hjemtransport` / `Hjemtransport` | intern, alle | Afledt sum | A | Supabase |
@@ -340,12 +364,12 @@ Kolonnerne nedenfor er udledt af kaldende kode og af `docs/pa-flows.md`.
 
 | Liste | Site | Kolonner (udledt) | Rækker | Apps | Kat. |
 |---|---|---|---|---|---|
-| `Tilbud` | `/sites/udlejning`, GUID `002cee28-969f-4c83-b7b3-e369e229c4ff` | `Title, Firma, Til, Fra, Kundenr, Saelger, Periode, Lejeperiode, Risiko, Dato, Status (Choice), TilbudId, Udtransport, Hjemtransport, Udlob, MaskinerJSON (multiline), Sagsnr, Opfolgning, Arkiveret (Yes/No)` | **Ukendt** | intern, vis-tilbud, dashboard_v2, afvis-tilbud, accept-tilbud | **C** (blandet, indeholder kundenavn/mail) |
-| `Samhandelsaftaler_Rabatter` | ukendt site | `KundeNr, Firma, Dato, Omsaetning, OmsaetningStark, ErKAM (Yes/No), Risikotillaeg, Transport, RabatJord/Lift/Trailer/Container/Bygning/Special, KAMMaskiner (JSON-streng), BilagValgt (JSON-streng), Status (Choice), AfsenderNavn, AfsenderMail, AfsenderTelefon, OvrigeSaelgereNavn/-Mail, KundeMail, KundeKontakt, KundeCvr, GyldigFra, VegneNavn, VegneMail, BeskedTilKunde, NethireNote, RealiseretOmsaetning, RealiseretOpdateret` | **Ukendt** | index, mit-omraade, admin, dashboard_v2 | **C** |
+| `Tilbud` | `/sites/udlejning`, GUID `002cee28-969f-4c83-b7b3-e369e229c4ff` | **RETTET — se `docs/datagrundlag.md` §1.3 for de faktiske 27 felter.** Kolonnerne her var udledt af kaldende kode og manglede `Cc`, `Tlf`, `Kontakt`, `Fritekst`, `Vilkaar`, `YdelserJSON`, `KundeNote`, `Slettet` | **29** | intern, vis-tilbud, dashboard_v2, afvis-tilbud, accept-tilbud | **C** (blandet, indeholder kundenavn/mail) |
+| `Samhandelsaftaler_Rabatter` | ukendt site | ⚠️ **RETTET — mindst 11 af navnene herunder var gættet forkert.** De faktiske står i `docs/datagrundlag.md` §1.3: `Rabat_JordOgAnlaeg`, `Rabat_Liftmateriel`, `Rabat_Trailerlifte`, `Rabat_ContainereOgLetvogne`, `Rabat_Bygningsmateriel`, `Rabat_Specialmaskiner`, `Forventet_Omsaetning`, `Forventet_Omsaetning_Stark`, `Saelger_Navn`, `Ovrige_saelgere_navn/-mail`, `KundeCVR` | **103** | index, mit-omraade, admin, dashboard_v2 | **C** |
 | `Kundeportaler` | ukendt site | `Token, KundeNr, Title, Kontakt, SenderNavn, SenderMail, SenderTlf, IsKam, NettoprisUrl, Bilag3Url, Created` | **Ukendt** (30 findes også i Git) | din-aftale, admin, index, mit-omraade, vis-tilbud | **C** |
-| `TilbudImport` | ukendt site | `oprindelse, nethire_tilbudsnr, nethire_url, nethire_order_id, modtaget, modtaget_fra, filnavn, status, firma, kundenr, adresse, afdeling, udlob, risiko, produkter, totaler, advarsler` | **Ukendt** | intern (Nethire-import) | **C** |
-| `Masterark_Priser` | `/sites/udlejning`, GUID `b803aafe-a1df-43ae-ba79-18a53c21406d` | `listepris` (+ ukendt) | **Ukendt** | `sp-patch.js` — **dødt, se §3.3** | A |
-| `Platformsbrugere` | — | — | **Findes ikke endnu.** Nævnt i `CLAUDE.md` §4 som fremtidig autoritativ brugerliste | — | **C** |
+| `TilbudImport` | ⚠️ **Findes ikke blandt de 31 lister** (`docs/datagrundlag.md` §1.1) | `oprindelse, nethire_tilbudsnr, nethire_url, nethire_order_id, modtaget, modtaget_fra, filnavn, status, firma, kundenr, adresse, afdeling, udlob, risiko, produkter, totaler, advarsler` | **Ukendt** | intern (Nethire-import) | **C** |
+| `Masterark_Priser` | `/sites/udlejning`, GUID `b803aafe-a1df-43ae-ba79-18a53c21406d` | 15 felter, alle `field_N` (regnearks-import) | **436** | **RETTET: intet af de 33 flows rører listen.** Efterladt | A |
+| ~~`Platformsbrugere`~~ | — | — | **RETTET: oprettes ikke.** `Medarbejdere` (3.618 rækker) bruges i stedet — se `docs/datagrundlag.md` §3.3 | — | **C** |
 
 `tilbud-status.js` refererer desuden `https://starkworkspace.sharepoint.com/sites/Koncepter-services`
 i en konstant der aldrig bruges. Formentlig et rest fra en tidligere placering af `Tilbud`-listen.
@@ -385,7 +409,7 @@ GET-grenen læser det døde flow, men POST-grenen er kundens **eneste** afvisnin
 |---|---|---|
 | PA-flow **tilbud-status** | Filteret på `Fra` ramte forbi hver gang tilbuddet blev sendt fra en anden adresse end sælgerens. Efterladt urørt i portalen | Nedlæg i portalen — beslutning udestår, jf. `docs/pa-flows.md` |
 | `sp-patch.js` | Funktionen indeholder tre udkommenterede løsningsforslag ("OPTION A/B/C") og fejler med 503 hvis `PA_SP_PATCH_URL` ikke er sat. Priser redigeres i dag via GitHub, ikke via SP | Slet funktionen og flowet |
-| `Masterark_Priser` (SP-liste) | Kun refereret fra `sp-patch.js` | Afklar om listen stadig bruges af nogen udenfor dette repo |
+| `Masterark_Priser` (SP-liste) | Kun refereret fra `sp-patch.js` | **AFKLARET: nej.** Intet af de 33 flows rører listen. Nedlægges efter eksport af de 436 rækker |
 | `intern-test.html` | Deployet, offentlig, ubrugt | Slet |
 | `stark_prisaftale_v5.html` | Deployet, offentlig, ubrugt | Slet |
 | `kundeaftaler_kopi/` | Deployet, offentlig, ubrugt, indeholder kundedata | Slet |
@@ -469,6 +493,8 @@ tal. Der findes altså allerede en autoritativ konfiguration — den er bare ikk
 | `samhandel-data.js` → visningsnavne | `Jord & Anlæg`, `Liftmateriel`, `Trailerlifte`, `Container & Letvogne`, `Bygningsmateriel`, `Specialmaskiner` |
 | `priser.json` produktkategorier | `Jord- og Anlægsmateriel` (81), `Bygningsmateriel` (129), `Liftmateriel` (84), `Varevogne & Containere` (34), `Letvogne` (43) |
 | `index.html` Bilag 1-filter (`data-cat`) | `JORD- OG ANLÆGSMATERIEL`, `BYGNINGSMATERIEL`, `LIFTMATERIEL`, `LETVOGNE` (versaler) |
+
+**BEKRÆFTET mod skemaet:** der findes ingen `Rabat_Lastvognslifte`-kolonne på listen.
 
 **Konkret datatab:** `lastvogn` sendes i payloaden fra `index.html:397` men har ingen
 modtagende SP-kolonne og ingen mapning i `samhandel-data.js`. Rabatten på
@@ -569,6 +595,31 @@ rapportering) kunne **ikke** undersøges for klient-tilstand. Se §8 og §10.
 ---
 
 ## 6. Akademiet særskilt
+
+> ### ⚠️ FORÆLDET AFSNIT — rettet 2026-08-12
+>
+> **Hele akademikomplekset er siden erklæret dødt** (`CLAUDE.md` §3.00, bekræftet af Jesper).
+> De ni SharePoint-akademilister og de 19 `Score_*`-kolonner på `Medarbejdere_Udlejning`
+> opdateres ikke længere. Akademiet på den nye platform bygges fra bunden med Supabase som
+> datalager — **ingen migrering, ingen bagudkompatibilitet**.
+>
+> To konkrete fejl i afsnittet nedenfor:
+>
+> 1. **"Der er ingen moduler, ingen lektioner og ingen quizspørgsmål"** er forkert.
+>    SharePoint-listen `Udlejning-MiniTests` indeholder 21 færdigskrevne spørgsmål med fire
+>    svarmuligheder og facit. Konklusionen byggede på, at akademi-*sitets frontend* ikke
+>    havde nogen quiz — hvilket ikke er det samme som, at der ikke fandtes spørgsmål.
+>    De 21 er ikke en migrationskilde, men kan bruges redaktionelt
+>    (`docs/datagrundlag.md` §2.3).
+> 2. **"Fremdrift findes kun i localStorage"** var ufuldstændigt. Der fandtes også 19
+>    `Score_*`-kolonner med 88 rækker. De er nu døde, så konklusionen holder i praksis —
+>    men den holdt ikke af den grund, afsnittet angav.
+>
+> **Datamodellen i §6.3 er stadig brugbar** som udgangspunkt for det nye akademi, men den
+> skal udvides med spørgsmål og besvarelser, som §6.1 troede ikke fandtes.
+>
+> Afsnittet er bevaret uændret nedenfor som dokumentation af, hvad der blev fundet og hvornår.
+
 
 ### 6.1 Struktur i dag
 
