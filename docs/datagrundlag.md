@@ -19,14 +19,14 @@ Rettelser til `docs/kortlaegning.md` og `CLAUDE.md` er samlet i §8. **Ingen af 
 
 | # | Fund | Hvor |
 |---|---|---|
-| 1 | **Engangskoder gemmes i klartekst** i `Medarbejdere.OTP`, sammen med 3.618 mailadresser | §4.3 |
-| 2 | **Koden invalideres aldrig ved brug.** Den kan genbruges indtil `OTPExpiry` | §4.3 |
-| 3 | **Der er ingen forsøgstæller og ingen rate limit.** Ubegrænsede gæt på en 6-cifret kode | §4.3 |
-| 4 | **Der ER en allowlist i dag** — `Medarbejdere`, 3.618 rækker. `CLAUDE.md` §7 siger der ingen er | §8 |
+| 1 | ⚠️ **Eksporterne i `flows/` kan ikke dateres, og mindst én er beviseligt forældet.** Alt i §4 er derfor hypotese, ikke kortlægning | **§4.4b** |
+| 2 | **`Medarbejdere` har ingen kolonne, der kan rumme et forsøgsantal** — bekræftet mod skemaet, uafhængigt af flow-eksporten | §4.3 |
+| 3 | Eksporten viser klartekstkoder uden invalidering og uden forsøgsgrænse — **ikke verificeret mod portalen** | §4.3 |
+| 4 | Eksporten viser en allowlist (`Medarbejdere`, 3.618 rækker), hvor `CLAUDE.md` §7 siger der ingen er — **ikke verificeret** | §4.3, §8 |
 | 5 | **Akademiets fremdrift ligger i `Medarbejdere_Udlejning` som 19 flade `Score_*`-kolonner** — ikke i de ni akademilister | §2 |
 | 6 | **Fire af de ni akademilister er tomme.** Hele mini-test- og kompetencemodellen er bygget, men aldrig taget i brug | §2 |
 | 7 | **Intet flow rører nogen akademiliste.** Der findes ingen automatik omkring dem overhovedet | §2 |
-| 8 | **Beregningskæden findes et syvende sted — inde i et PA-flow — og i en tredje, forkert variant** | §6 |
+| 8 | **Beregningskæden findes et syvende sted — inde i et dagligt PA-flow.** Tallene er verificeret korrekte; problemet er placeringen | §6.3 |
 | 9 | **`priser.json` i repoet er autoritativ.** `Priser_Materiel` slettes og genopbygges dagligt fra den | §6 |
 | 10 | **`Sendtilbud`s mailkald er allerede en ren `sendMail`-adapter.** Vi skal ikke bygge et nyt flow | §4.2 |
 
@@ -663,40 +663,96 @@ formular til en navngiven privatperson**. 576 indsendelser (389 + 132 + 55) er k
 postkasse. Det er ikke ulovligt, men det er en personhenførbar kopi uden for listen, og det
 bør være et bevidst valg. **Spørgsmål til Jesper.**
 
-### 4.3 OTP-flowene — det gamle mønster er svagere end `CLAUDE.md` §7 beskriver
+### 4.3 OTP-flowene
 
-`CLAUDE.md` §7 siger: *"Fungerer som `intern.html` gør i dag. Mønstret er i drift og ændres
-ikke."* **Definitionerne modsiger det på seks af syv punkter.**
+> ### ⚠️ VERIFIKATIONSSTATUS — læs denne først
+>
+> Jeg er blevet bedt om at verificere disse fund **mod de kørende flows** i stedet for mod
+> eksporten. **Det kan jeg ikke.** Der findes ingen Power Automate- eller
+> Power Platform-adgang i denne session — jeg har søgt efter et værktøj og fundet intet.
+> Mit eneste grundlag er de samme eksporter i `flows/`, som prisfundet i §6.3 netop har
+> bevist kan være forældede.
+>
+> Jeg rapporterer derfor hvert punkt med **kilde og status**, ikke som bekræftet eller
+> afkræftet. At kalde noget "bekræftet" på et grundlag, der lige er vist upålideligt, ville
+> være præcis den fejl, `CLAUDE.md` §5.7 er skrevet imod.
+>
+> Ét punkt kan delvist afgøres uafhængigt, fordi `docs/sharepoint/sp-skemaer.json` er en
+> **anden kilde** end flow-eksporterne — og en, der beviseligt er aktuel, fordi den bærer
+> live `ItemCount`-tal. Se punkt 3.
 
-| `CLAUDE.md` §7 kræver | `OTPLogin-Intern` / `OTPVerify-Intern` gør | |
+#### Punkt for punkt
+
+**1. Gemmes koden i klartekst?**
+
+| | |
+|---|---|
+| **Eksporten siger** | Ja. `Compose = "@rand(100000, 999999)"` genererer koden; `item/OTP = "@outputs('Compose')"` skriver den råt. Der er ingen hash-funktion nogen steder i definitionen |
+| **Uafhængig kilde** | Delvist. Skemaet viser `OTP` som `Text`, `MaxLength 255`. Det rummer både en 6-cifret kode og et 64-tegns hash — **skemaet kan derfor hverken bekræfte eller afkræfte** |
+| **Status** | ⚠️ **IKKE VERIFICERET.** Kan kun afgøres ved at åbne `OTPLogin-Intern` i portalen og se, om `item/OTP` stadig skriver `outputs('Compose')` direkte |
+
+**2. Ryddes koden ved brug?**
+
+| | |
+|---|---|
+| **Eksporten siger** | Nej. `OTPVerify-Intern`s `Update_item` i ja-grenen sætter **kun** `item/AccountEnabled = True`. `OTP` og `OTPExpiry` røres ikke |
+| **Uafhængig kilde** | Ingen. Kan ikke ses af skemaet |
+| **Status** | ⚠️ **IKKE VERIFICERET** |
+
+**3. Findes der en forsøgstæller eller rate limit?**
+
+| | |
+|---|---|
+| **Eksporten siger** | Nej. Ingen tæller, ingen throttling i nogen af de to definitioner |
+| **Uafhængig kilde** | **Ja — og den er stærk.** `Medarbejdere` har præcis seks felter: `Title`, `Mail`, `DisplayName`, `AccountEnabled`, `OTP`, `OTPExpiry`. **Der findes ingen kolonne, der kan rumme et forsøgsantal.** Skemaet er aktuelt (det bærer live `ItemCount` = 3.618) |
+| **Status** | ✅ **BEKRÆFTET for en persistent tæller på `Medarbejdere`** — uanset hvad flowet gør, kan det ikke tælle forsøg i den liste. ⚠️ **IKKE VERIFICERET i øvrigt:** en tæller kunne ligge i en anden liste (ingen af de 31 ligner dog en kandidat) eller i en ekstern tjeneste |
+
+**4. Hvornår sættes `AccountEnabled`?**
+
+| | |
+|---|---|
+| **Eksporten siger** | To steder: i `OTPLogin-Intern` (**ved anmodningen**, før nogen har bevist noget) og igen i `OTPVerify-Intern` (ved verifikation). Desuden sætter `SyncMedarbejderefraGraph` det til `True` på alle nyoprettede rækker |
+| **Uafhængig kilde** | Kun at feltet findes og er `Boolean` |
+| **Status** | ⚠️ **IKKE VERIFICERET.** Bemærk, at Graph-synkroniseringen sætter feltet uafhængigt af login — så det er under alle omstændigheder ikke en spærre, der styres af OTP-flowet alene |
+
+#### De øvrige §7-punkter, samme forbehold
+
+| `CLAUDE.md` §7 kræver | Eksporten viser | Status |
 |---|---|---|
-| Ingen allowlist | `$filter=Title eq '<mail>'` + `equals(length(...), 1)` — **findes mailen ikke i `Medarbejdere`, sendes ingen kode** | ❌ |
-| Kun **hash** gemmes, aldrig klartekst | `item/OTP = @outputs('Compose')` — **koden i klartekst** | ❌ |
-| Engangsbrug, invalideres ved brug | `Update_item` sætter kun `AccountEnabled`. **`OTP` ryddes aldrig** | ❌ |
-| Maks 5 forsøg | Ingen tæller nogen steder | ❌ |
-| Rate limit pr. adresse og pr. IP | Ingen | ❌ |
-| Identisk svar uanset udfald | To forskellige `Response`-grene i `Condition` | ❌ |
-| TTL 10 min | `OTPExpiry` sammenlignes med `utcNow()` | ✅ |
+| Ingen allowlist | `$filter=Title eq '<mail>'` + `equals(length(...), 1)` | ⚠️ Ikke verificeret |
+| Identisk svar uanset udfald | `Response` 200 i ja-grenen, `Response_1` 401 i nej-grenen | ⚠️ Ikke verificeret |
+| TTL 10 min | `Compose_1 = "@addMinutes(utcNow(), 10)"`, sammenlignet i `Condition` | ⚠️ Ikke verificeret — men stemmer med §7 |
+| 6 cifre, `crypto.randomInt` | `"@rand(100000, 999999)"` — PA's `rand()` er ikke kryptografisk sikker | ⚠️ Ikke verificeret. **Nyt punkt**, ikke nævnt i den oprindelige udgave |
 
-Konsekvenser af de tre første tilsammen: en gyldig kode ligger læsbar i en liste, som 3.618
-mailadresser også ligger i, den kan bruges igen og igen indtil den udløber, og der er ingen
-grænse for, hvor mange gange den kan gættes.
+> ### Hvad det betyder for anbefalingen
+>
+> **Anbefalingen ændrer sig ikke, og den afhænger ikke af, om fundene holder.**
+>
+> Begge flows nedlægges, og OTP-logikken bygges i `lib/auth.js` efter §7 som skrevet.
+> Er det kørende mønster bedre end eksporten antyder, er den nye implementering stadig
+> den, der skal bruges — den er testbar, versionsstyret og reviewet.
+>
+> **Det, der ændrer sig, er hastesagen.** Den oprindelige udgave anbefalede at rykke
+> OTP-rettelsen frem foran alt andet (§7, trin `0b`), fordi klartekstkoder uden
+> forsøgsgrænse er et problem i drift *nu*. Den prioritering hvilede på eksporten.
+> **Den bør ikke handles på, før nogen har åbnet de to flows i portalen** — det tager
+> et par minutter og afgør, om trin `0b` er akut eller helt kan udgå.
+>
+> Én ting står dog fast uanset: **der kan ikke tælles forsøg i `Medarbejdere`**, fordi
+> kolonnen ikke findes. Findes der ingen tæller andetsteds, er en 6-cifret kode med
+> 10 minutters levetid udsat for uendelig gætning.
 
-Desuden sætter **login-anmodningen** `AccountEnabled = True`, altså før nogen har bevist noget.
-Feltet er dermed ikke en spærre.
+#### Konkret tjekliste til portalen
 
-> ### Anbefaling
->
-> **Begge flows nedlægges.** Hele OTP-logikken flyttes til `lib/auth.js`, bygget efter §7 som
-> skrevet — ikke efter det, der kører.
->
-> **Og §7 skal rettes**, så den ikke længere påstår, at det nuværende mønster opfylder den.
-> Se §8. Det er en sikkerhedsregel; den bør ikke hvile på en forkert præmis.
->
-> Bemærk konsekvensen af "ingen allowlist": porten bliver bredere, ikke smallere. I dag skal
-> mailen findes i `Medarbejdere` (som ganske vist er hele STARK Group). Fjernes det, kan
-> enhver `@stark.dk`-adresse anmode. Det er formentlig det tilsigtede — men det er en
-> udvidelse, ikke status quo, og bør bekræftes.
+Fire ting at kigge efter, i `OTPLogin-Intern` og `OTPVerify-Intern`:
+
+1. I `OTPLogin` → `Update_item`: står der stadig `item/OTP = outputs('Compose')`, eller er der
+   kommet en hash-funktion ind?
+2. I `OTPVerify` → ja-grenens `Update_item`: sættes `item/OTP` til tom, eller sættes stadig kun
+   `AccountEnabled`?
+3. Findes der nogen tæller — en ny kolonne, en variabel, et opslag i en anden liste?
+4. Sættes `AccountEnabled = True` stadig i `OTPLogin` (altså ved anmodningen), eller er det
+   flyttet til `OTPVerify` alene?
 
 ### 4.4 `SyncMedarbejderefraGraph` — det tredje flow
 
@@ -721,6 +777,73 @@ adgang til tenanten.
 >
 > Kan det ikke lade sig gøre, er dette det ene flow, der berettiget bliver et tredje.
 > **Spørgsmål til Jesper.**
+
+### 4.4b Hvor pålidelige er eksporterne i `flows/`?
+
+Tilføjet 2026-08-12, efter at prisfundet i §6.3 viste sig at bygge på en forældet eksport.
+
+**Kort svar: eksporterne kan ikke dateres, og mindst én er beviseligt forældet. Derfor kan
+ingen af dem antages aktuelle.**
+
+#### Hvad jeg har undersøgt
+
+| Spor | Resultat |
+|---|---|
+| **Tidsstempler i filerne** | **Ingen.** De 33 eksporter indeholder kun `id`, `name` og `properties` med `apiId`, `connectionReferences`, `definition`, `displayName`, `flowFailureAlertSubscribed`, `isManaged`, `type`. En fuld PA-eksport bærer normalt `createdTime`, `lastModifiedTime` og `state` — **alle tre mangler i alle 33** |
+| **Versionsnummer** | Ingen. `$schema` peger på `workflowdefinition.json#` i alle 33 — det er formatversionen, ikke flowets |
+| **Git-historik** | Alle 33 er tilføjet i **én commit** (`357a2de`, "Add files via upload", 2026-08-12). Git viser hvornår filerne blev lagt i repoet, ikke hvornår hvert flow sidst blev rettet i portalen |
+| **Kendt afvigelse** | Prisflowet: eksporten viser `field_7 = listepris × 0.035` og `field_8 = listepris × 1.1`; den kørende version er verificeret korrekt. **Mindst én eksport er altså forældet** |
+
+Der er intet i eller omkring filerne, der kan skelne en eksport fra i går fra en fra sidste år.
+
+#### Hvilke fund der er i risiko
+
+**I risiko — bygger udelukkende på flow-eksporterne:**
+
+| Fund | Afsnit |
+|---|---|
+| Alle fire OTP-punkter | §4.3 |
+| At `Sendtilbud` allerede er en `sendMail`-adapter, og hvad der skal fjernes | §4.2 |
+| At `FormularEmailGateway` BCC'er til en privatadresse | §4.2 |
+| Klassificeringen NEDLÆG / ADAPTER / DØD for alle 33 | §4.1 |
+| Tællingen af `If`/`Switch` og expressions | §4.1 |
+| At `tilbud-status` er dødt | §4.1 |
+| At prisflowet henter `priser-array.json` og genopbygger `Priser_Materiel` dagligt | §6.1 |
+| At `SyncMedarbejderefraGraph` sletter rækker | §3, §4.4 |
+| **At intet flow rører nogen akademiliste** | §2.2, §7 |
+
+Det sidste fortjener en særlig bemærkning: det er en **negativ** påstand på tværs af alle 33
+filer. Den er svagere end de øvrige, fordi den også falder, hvis der findes et flow i
+tenanten, som slet ikke er eksporteret hertil. Antallet af flows i portalen er ukendt.
+
+**Ikke i risiko — bygger på `sp-skemaer.json` eller på filer i repoet:**
+
+| Fund | Hvorfor det holder |
+|---|---|
+| Alle feltnavne, typer, `Choice`-værdier, `Lookup`-mål, KODET-navne | Fra skemaeksporten |
+| Alle rækketal og de 8 tomme lister | `antalElementer` er live-forespurgt data |
+| De 19 `Score_*`-kolonner | Skemaet |
+| At `Tilbud` har `Cc`, `Tlf`, `Kontakt`, `Fritekst`, `Vilkaar`, `YdelserJSON` | Skemaet |
+| De 11 forkert gættede kolonnenavne på `Samhandelsaftaler_Rabatter` | Skemaet |
+| At der ikke findes en `Rabat_Lastvognslifte`-kolonne | Skemaet |
+| At `Medarbejdere` ikke har en forsøgstæller-kolonne | Skemaet |
+| At `priser-array.json` er tre produkter bagud | Repofiler + `generate-array.py` |
+
+**Skemaeksporten er en anden og bedre kilde end flow-eksporterne.** Den bærer live
+`ItemCount`-tal, hvilket betyder, at den er trukket mod den kørende SharePoint. Der er intet
+tilsvarende bevis for, at flow-eksporterne er trukket samtidig — eller overhovedet fra samme
+tidspunkt indbyrdes.
+
+#### Hvad der bør gøres
+
+1. **Genudtræk `flows/` fra portalen**, og noter datoen i repoet. Uden en dato er enhver
+   fremtidig analyse på samme usikre grund.
+2. **Bevar `createdTime`, `lastModifiedTime` og `state`** i eksporten. De tre felter havde
+   gjort denne undersøgelse overflødig.
+3. **Notér antallet af flows i portalen**, så det kan sammenholdes med de 33. Er der flere,
+   er alle negative påstande i dokumentet ufuldstændige.
+4. Indtil da: **behandl §4 som en hypotese, ikke som en kortlægning.** §1, §2, §3, §5 og §6.1–6.2
+   bygger på skemaerne og står fast.
 
 ### 4.5 Hvad flowene gør, som ikke har en oplagt afløser
 
@@ -834,35 +957,42 @@ værd at bemærke: `admin.html` skriver til `priser.json` via GitHub, mens `pris
 kun opdateres, hvis nogen husker at køre scriptet i hånden. **I den nye platform bortfalder
 begge filer** — priser bliver rækker i Supabase, og det afledte array forsvinder.
 
-### 6.3 Beregningskæden findes et syvende sted — og i en tredje variant
+### 6.3 Beregningskæden findes et syvende sted
 
-Prisflowet **beregner selv** ved indsættelse:
+> ### ⚠️ RETTET 2026-08-12
+>
+> **Den oprindelige udgave af dette afsnit påstod, at prisflowet regnede miljøbidrag og total
+> forkert. Den påstand er trukket tilbage.**
+>
+> Jesper har verificeret det **kørende** flow: `field_7` og `field_8` beregnes korrekt i
+> produktion. Fejlen lå ikke i flowet, men i mit grundlag — eksporten i
+> `flows/Recurrence-HTTP,ParseJSON,Getitems,Applytoeach,Applytoeach/definition.json` er
+> **forældet** og afspejler en tidligere version.
+>
+> Til protokols, fordi det er afgørende for §4.6: **min læsning af eksporten var korrekt.**
+> Filen indeholder ordret
+> `"@float(formatNumber(mul(items('Apply_to_each_1')?['listepris'], 0.035), '0.00'))"` for
+> `field_7` og `… 1.1 …` for `field_8`. Fejlen var ikke en fejllæsning, men en antagelse om,
+> at eksporten svarede til virkeligheden. Se §4.6.
 
-```
-item/field_4 (Listepris_pr_dag)  = listepris
-item/field_5 (Kundepris_pr_dag)  = listepris                          ← ingen rabat
-item/field_6 (Risikotillæg)      = listepris × 0.065                  ← korrekt
-item/field_7 (Miljøbidrag)       = listepris × 0.035                  ← FORKERT
-item/field_8 (Kundepris_total)   = listepris × 1.1                    ← FORKERT
-```
+Prisflowet **beregner selv** ved indsættelse i `Priser_Materiel`. Det er stadig rigtigt, og
+det er stadig pointen:
 
-| Formel | `CLAUDE.md` §5.5 | Flowet |
-|---|---|---|
-| Risikotillæg | `listepris × 6,5 %` | `listepris × 0.065` ✅ |
-| Miljøbidrag | `(nettopris + risikotillæg) × 3,5 %` | `listepris × 0.035` ❌ |
-| Total | netto + risiko + miljø | `listepris × 1.1` ❌ |
+| Felt | Hvad flowet beregner |
+|---|---|
+| `field_4` (Listepris_pr_dag) | `listepris` |
+| `field_5` (Kundepris_pr_dag) | `listepris` — ingen rabat på spejlet |
+| `field_6` (Risikotillæg) | `listepris × 6,5 %` |
+| `field_7` (Miljøbidrag) | **Verificeret korrekt i den kørende version.** Formlen i eksporten er forældet |
+| `field_8` (Kundepris_total) | **Verificeret korrekt i den kørende version.** Formlen i eksporten er forældet |
 
-Miljøvarianten er **hverken v1 eller v2**: v1 regner af nettopris, v2 af (netto + risiko),
-flowet af listepris. Med 0 % rabat falder v1 og flowets variant sammen — men kun der.
-
-`× 1.1` er et fladt 10 %-tillæg. For listepris 1.000 kr. giver kæden 1.000 + 65 + 37 =
-**1.102 kr.**; flowet giver **1.100 kr.** Tæt nok til aldrig at være blevet opdaget, forkert nok
-til at være forkert.
-
-> **Kortlægningen §4.1 talte seks implementeringer med otte sæt hardkodede tal. Det rigtige tal
-> er mindst syv implementeringer, og den syvende ligger uden for repoet, i et flow der kører
-> dagligt.** Det styrker `CLAUDE.md` §5.5's begrundelse: så længe beregningen kan skrives et
-> nyt sted, bliver den det.
+> **Kortlægningen §4.1 talte seks implementeringer af beregningskæden. Det rigtige tal er
+> mindst syv, og den syvende ligger uden for repoet, i et flow der kører dagligt.**
+>
+> Det står ved magt, uanset om flowets tal er rigtige eller forkerte. Pointen er ikke, at
+> implementeringen var forkert — den var faktisk rigtig — men at kæden **kan skrives et sted,
+> ingen reviewer, og hvor ingen test fanger en afvigelse.** At den her er korrekt, er et
+> resultat af omhu, ikke af konstruktionen. Det er netop det, `CLAUDE.md` §5.5 vil af med.
 
 `Masterark_Priser` (436 rækker) har egne kolonner `Risikotillæg`, `Miljøbidrag` og `Total/dag`
 — alle **Text**. Intet flow rører listen. Den er **en ottende kopi af de samme tal**, sandsynligvis
@@ -949,7 +1079,7 @@ medarbejderes fremdrift og 21 quizspørgsmål. Det gør den lidt større, men ik
 > | # | Trin | Ændring ift. §11 |
 > |---|---|---|
 > | **0a** | **Eksportér `Score_*` fra `Medarbejdere_Udlejning`** (88 rækker) | **NY.** De er de eneste akademidata, der findes, og intet flow beskytter dem |
-> | **0b** | **Ret OTP-mønstret** (§4.3) | **FLYTTET FREM.** Klartekstkoder, ingen invalidering og ingen forsøgsgrænse er i drift nu. Det bør ikke vente på tur |
+> | **0b** | **Åbn `OTPLogin-Intern` og `OTPVerify-Intern` i portalen** og afgør, om §4.3's fund gælder | **ÆNDRET.** Var: "ret OTP-mønstret, det haster". Den prioritering byggede på eksporten, som er upålidelig (§4.4b). Tjekket tager minutter og afgør, om rettelsen er akut eller kan udgå |
 > | 1 | Fundament + `/akademi` | Uændret |
 > | 2 | `/kunde/*` + dokumentadgang | Uændret |
 > | 3 | `/rapportering/*` + `/admin`-ledelsesvisning | Uændret. `FormularEmailGateway` er allerede tæt på en adapter |
@@ -970,10 +1100,10 @@ medarbejderes fremdrift og 21 quizspørgsmål. Det gør den lidt større, men ik
 
 | # | Sted | Rettelse |
 |---|---|---|
-| 1 | **§7, "Ingen allowlist"** | Der **er** en allowlist i dag: `OTPLogin-Intern` kræver præcis ét match i `Medarbejdere` (3.618 rækker). At fjerne den er en **udvidelse** af adgangen, ikke status quo |
-| 2 | **§7, "Mønstret er i drift og ændres ikke"** | Forkert. Det nuværende mønster fejler seks af syv krav i §7: klartekstkode, ingen invalidering, ingen forsøgstæller, ingen rate limit, forskellige svar, allowlist. **§7 beskriver målet, ikke nutiden** — formuleringen bør rettes, så en sikkerhedsregel ikke hviler på en forkert præmis |
+| 1 | **§7, "Ingen allowlist"** | Eksporten viser en allowlist: `OTPLogin-Intern` kræver præcis ét match i `Medarbejdere` (3.618 rækker). Fjernes den, er det en **udvidelse** af adgangen, ikke status quo. ⚠️ **Ikke verificeret mod portalen** (§4.3) |
+| 2 | **§7, "Mønstret er i drift og ændres ikke"** | Formuleringen bør rettes uanset udfaldet af verifikationen: §7 beskriver et **mål**, og at påstå at nutiden allerede opfylder det gør reglen uefterprøvelig. Om de seks konkrete afvigelser gælder, kan først afgøres i portalen (§4.3) |
 | 3 | **§9.3, `Platformsbrugere`** | Listen findes ikke og bør ikke oprettes. `Medarbejdere` er allerede autoritativ, synkroniseret dagligt fra Graph og har `Mail` + `DisplayName` (§3.3) |
-| 4 | **§5.5, beregningskæden** | "seks implementeringer" er for lavt. Der er mindst **syv**, og den syvende ligger i et PA-flow uden for repoet (§6.3) |
+| 4 | **§5.5, beregningskæden** | "seks implementeringer" er for lavt. Der er mindst **syv**, og den syvende ligger i et PA-flow uden for repoet. Den regner rigtigt — men uden for review og test (§6.3) |
 | 5 | **§5.5, `stigning%`** | Leddet har aldrig været i brug. Kilden (`Varslede prisændringer`) er tom, og `priser.json` har ingen `basispris` (§6.4) |
 | 6 | **§3.0, "to flows i alt"** | `SyncMedarbejderefraGraph` er en reel tredje kandidat med Graph-adgang uden afløser (§4.4). Enten foldes den ind i adapteren, eller også bliver målet tre |
 | 7 | **§11, rækkefølge** | `/akademi` rører **ikke** SharePoint — bekræftet. Men den har 88 rækker rigtige data, der skal eksporteres først (§7) |
@@ -1020,6 +1150,8 @@ medarbejderes fremdrift og 21 quizspørgsmål. Det gør den lidt større, men ik
 | **`flows/test`** | Pladsholderfil på 1 byte |
 | **Om de 8 tomme lister nogensinde har haft data** | `ItemCount` viser nutiden. Der er intet i skemaer eller flows, der kan afgøre historikken |
 | **Faktisk rækkeindhold i alle 31 lister** | Jeg har haft skemaer og rækketal, aldrig data. Ingen påstand i dette dokument bygger på en læst række |
+| **Om nogen af de 33 flow-eksporter svarer til det, der kører** | Ingen Power Automate-adgang i sessionen; jeg har søgt efter et værktøj og fundet intet. Eksporterne bærer ingen tidsstempler, og mindst én er bevist forældet. Se §4.4b |
+| **Hvor mange flows der findes i portalen i alt** | Er der flere end de 33, er alle negative påstande i §4 ufuldstændige — herunder "intet flow rører nogen akademiliste" |
 | **De 5 øvrige flows uden detailgennemgang** | `Acceptertilbud`, `Bestillingaf*`, `CyclingForCancer*`, `HUBTidsregistrering`, `Kundeportaler*` — klassificeret ud fra actions, connectors og liste-GUID'er, ikke linje for linje |
 
 ### 9.3 Påstande, jeg ikke kan stå inde for
@@ -1028,6 +1160,10 @@ medarbejderes fremdrift og 21 quizspørgsmål. Det gør den lidt større, men ik
   `ErKAM`, `Sagsnr`, `Kommentar`-felter — kræver en beslutning, ikke en vurdering fra skemaet.
 - **"Intet flow rører X"** gælder de 33 definitioner i `flows/`. Er der flows i tenanten, som
   ikke er eksporteret hertil, dækker udsagnet dem ikke.
+- **Hele §4 hviler på eksporter, der ikke kan dateres, og hvoraf mindst én er forældet.**
+  Prisfundet i §6.3 er trukket tilbage af netop den grund. Jeg har ikke kunnet efterprøve, om
+  de øvrige flow-fund lider af samme fejl — se §4.4b for hvilke der er i risiko, og hvilke
+  der hviler på skemaeksporten og derfor står fast.
 - **Expression-tallene er omtrentlige.** De tæller `@funktion(`-forekomster i den serialiserede
   definition og er et groft mål for logikmængde, ikke et præcist antal.
 - **Jeg har ikke kørt noget flow og ikke læst en eneste listerække.**
