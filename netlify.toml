@@ -1,0 +1,36 @@
+[build]
+  publish  = "src"
+  functions = "netlify/functions"
+  # Ingen build. Statisk HTML/CSS/JS (CLAUDE.md §6).
+  command  = ""
+
+[functions]
+  node_bundler = "esbuild"
+  # ESM. Filer under lib/ er hjælpemoduler, ikke endpoints — Netlify samler dem
+  # automatisk med, fordi de importeres.
+  directory = "netlify/functions"
+
+# Alle API-kald går gennem functions. Ingen rute peger direkte på Power Automate:
+# det gamle system proxyede /api/flow og /api/template-update direkte til PA med
+# signaturen i URL'en, hvilket brød adapterlaget (docs/kortlaegning.md §8.1, punkt 6).
+[[redirects]]
+  from = "/api/*"
+  to   = "/.netlify/functions/:splat"
+  status = 200
+
+# Pæne ruter uden .html
+[[redirects]]
+  from = "/login"
+  to   = "/login.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    # Ingen tredjeparts-CDN'er overhovedet (designoplæg §6). Fonte er en
+    # systemfont-stak, så der er intet font-host at tillade.
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"

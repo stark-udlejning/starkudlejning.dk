@@ -1,0 +1,11 @@
+node_modules/
+.netlify/
+.env
+.env.*
+!.env.example
+
+# Byggeartefakter og værktøjsstøj
+.DS_Store
+*.log
+coverage/
+.vitest/
