@@ -97,7 +97,49 @@ De to PA-flows er **adaptere, ikke logik**: nul betingelser, nul expressions, nu
 
 ## 3. Data — tre kategorier
 
+### 3.00 Kendte døde systemer
+
+Følgende er **udgået og opdateres ikke længere**. De skal hverken migreres, analyseres
+videre eller have en rute. De nedlægges uden erstatning:
+
+- De ni akademilister: `Akademi_Master`, `Udlejning-Kurser`, `Udlejning-Læringspakker`,
+  `Udlejning-Kompetencer`, `Udlejning-KompetenceScores`, `Udlejning-KompetenceResultater`,
+  `Udlejning-KursusTilmeldinger`, `Udlejning-MiniTests`, `Udlejning-MiniTestBesvarelser`
+- De 19 `Score_*`-kolonner på `Medarbejdere_Udlejning` — akademiet er siden bygget om,
+  og kolonnerne opdateres ikke. **Der er ingen fremdrift at migrere.**
+
+Akademiet på den nye platform bygges fra bunden med Supabase som datalager. Ingen
+engangsimport, ingen bagudkompatibilitet.
+
+**Regel:** Er en liste eller et flow tom, forældet eller uden læsere, så antag ikke selv,
+at den er død — og antag heller ikke, at den lever. Spørg Jesper. Kun han ved, hvad der
+stadig bruges i praksis.
+
 Hvert felt hører til præcis én kategori. Er du i tvivl: **spørg, opret det ikke.**
+
+### 3.0 Standardretningen
+
+**Målet er at komme væk fra SharePoint-lister og PA-flows.** Ikke at fordele data pænt
+mellem dem.
+
+Slutbilledet er:
+
+- **To PA-flows i alt** — `SendMail` og én SharePoint-adapter. Alt andet nedlægges.
+- **SharePoint reduceres til dum lagring** af de felter, der identificerer nogen.
+  Ingen logik, ingen beregning, ingen visning.
+- **Alt andet i Supabase**, hvor det kan versionsstyres, testes og reviewes.
+
+Derfor: **Supabase er standardvalget. SharePoint kræver en begrundelse.**
+
+Begrundelsen kan kun være kategori C — at feltet identificerer en person, og at flytning
+derfor ville gøre Supabase til databehandler. At data *allerede* ligger i en
+SharePoint-liste er ikke en begrundelse for at lade dem blive.
+
+Kan et felt pseudonymiseres til kategori B, skal det pseudonymiseres og flyttes. Kun det,
+der ikke kan fungere uden den identificerende værdi, bliver.
+
+Af 31 nuværende lister forventes langt hovedparten at kunne nedlægges. En liste, der
+overlever, skal kunne peges på et konkret kategori C-felt.
 
 ### Kategori A — Ikke-persondata → Supabase, frit
 
@@ -307,27 +349,37 @@ Du åbner PR'er. Jesper merger. Ingen undtagelser.
 
 ## 7. Auth — interne
 
-Fungerer som `intern.html` gør i dag. Mønstret er i drift og ændres ikke.
+**Det nuværende OTP-flow er IKKE referencen.** Tidligere versioner af denne fil sagde, at
+mønstret i `intern.html` var i drift og skulle genskabes. Det var forkert. Datagrundlaget
+(`docs/datagrundlag.md` §4.3) viser, at det fejler seks af syv krav nedenfor: koder gemmes i
+klartekst, invalideres aldrig ved brug, har hverken forsøgstæller eller rate limit, og
+kontoen aktiveres allerede ved anmodningen.
+
+Genskab intet fra det flow. Kravene nedenfor er autoritative og skal implementeres fra bunden.
 
 - **Ingen allowlist.** Enhver gyldig `@stark.dk`-adresse kan anmode om en kode.
   Adgangskontrollen er, at koden kun kan modtages i en STARK-postkasse.
 - Andre domæner afvises.
-- 6 cifre, `crypto.randomInt`. Kun **hash** gemmes, aldrig koden i klartekst.
-- TTL 10 min, engangsbrug. Maks 5 forsøg. Rate limit pr. adresse og pr. IP.
-- Identisk svar uanset udfald.
+- 6 cifre, `crypto.randomInt`.
+- **Kun hash gemmes.** Aldrig koden i klartekst, hverken i database, log eller flow.
+- TTL 10 min. **Invalideres ved første brug** — en brugt kode må aldrig kunne genbruges.
+- Maks 5 forsøg pr. kode, derefter invalideres den.
+- Rate limit pr. adresse og pr. IP.
+- Identisk svar uanset udfald — én svargren, ikke to.
 - Session i signeret cookie: `httpOnly`, `Secure`, `SameSite=Lax`, host-only.
   8 timer for brugere, 1 time på `/admin`.
 
 **Ved første succesfulde login oprettes automatisk en række** i `brugere` med
-`email_hash`, `rolle = 'bruger'` og `aktiv = true`. Tabellen er altså et **register over
-hvem der har været inde**, ikke en port man skal stå på for at komme ind.
+`email_hash`, `rolle = 'bruger'` og `aktiv = true`. Tabellen er et **register over hvem der
+har været inde**, ikke en port man skal stå på for at komme ind.
+
+Kontoen må først aktiveres ved **verifikation**, aldrig ved anmodning.
 
 `aktiv = false` blokerer login. Det er den eneste måde at lukke en enkelt person ude, og den
 bruges kun undtagelsesvist — normalt lukkes adgangen ved, at postkassen spærres.
 
 Konsekvens værd at kende: porten er "har en `@stark.dk`-postkasse", hvilket er hele
-STARK Group og ikke kun Udlejning. Det svarer til nuværende praksis. Brugerlisten i
-`/admin/brugere` er modvægten — den gør synligt, hvem der faktisk logger ind.
+STARK Group og ikke kun Udlejning. Brugerlisten i `/admin/brugere` er modvægten.
 
 ---
 
