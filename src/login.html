@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log ind · STARK Udlejning</title>
+<link rel="stylesheet" href="/shared/tokens.css">
+<link rel="stylesheet" href="/shared/base.css">
+<link rel="stylesheet" href="/shared/components.css">
+</head>
+<body>
+<a class="spring-til-indhold" href="#indhold">Spring til indhold</a>
+<div class="side">
+  <header class="header">
+    <div class="indhold header__rk">
+      <a class="logo" href="/">
+        <span class="logo__mark" aria-hidden="true">S</span>
+        <span class="logo__navn">Stark</span>
+        <span class="logo__tag">Udlejning</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="indhold" class="side__hoved indhold login-side">
+    <div class="kort login-kort">
+      <h1>Log ind</h1>
+      <p class="hjaelpetekst">
+        Med din @stark.dk-mailadresse. Vi sender en kode, der er gyldig i 10 minutter.
+      </p>
+
+      <div id="besked-omraade" role="status" aria-live="polite"></div>
+
+      <form id="mail-formular">
+        <div class="felt">
+          <label class="label" for="email">Mailadresse</label>
+          <input class="input" type="email" id="email" name="email"
+                 autocomplete="email" placeholder="fornavn.efternavn@stark.dk" required>
+        </div>
+        <button class="knap knap--primaer knap--stor" type="submit">
+          Send kode
+        </button>
+      </form>
+
+      <form id="kode-formular" hidden>
+        <div class="felt">
+          <label class="label" for="kode">Kode</label>
+          <input class="input" type="text" id="kode" name="kode" inputmode="numeric"
+                 pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required>
+          <span class="hjaelpetekst">6 cifre. Sendt til den mailadresse, du indtastede.</span>
+        </div>
+        <button class="knap knap--primaer knap--stor" type="submit">
+          Log ind
+        </button>
+        <button class="knap knap--tekst" type="button" id="skift-mail">
+          Brug en anden mailadresse
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="indhold footer__rk">
+      <span>STARK Udlejning · internt værktøj</span>
+    </div>
+  </footer>
+</div>
+<script type="module" src="/login.js"></script>
+</body>
+</html>

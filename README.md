@@ -21,9 +21,13 @@ Designsystemet kan gennemgås uden opsætning: åbn `src/shared/demo.html` direk
 
 ```
 src/
+  index.html, hub.js        midlertidig forside (docs/hub-plan.md)
+  login.html, login.js      login
   shared/          tokens.css, base.css, components.css, layout.js, demo.html
 netlify/functions/
-  lib/             pseudonym.js, supabase.js, sendMail.js, sharepoint.js, pricing.js
+  auth-login.js, auth-verificer.js, auth-mig.js, auth-logud.js
+  lib/             pseudonym.js, supabase.js, sendMail.js, sharepoint.js, pricing.js,
+                   auth.js, pa-otp.js
 supabase/migrations/
 tests/
 docs/
@@ -75,7 +79,8 @@ Sættes i Netlify env vars, aldrig i repoet. Se `.env.example`.
 | `PSEUDONYM_SECRET` | `lib/pseudonym.js` |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | `lib/supabase.js` |
 | `PA_SENDMAIL_URL`, `PA_SHARED_SECRET` | `lib/sendMail.js` |
-| `SESSION_SECRET` | `lib/auth.js` (PR 2) |
+| `SESSION_SECRET` | `lib/auth.js` — HMAC-nøgle til sessionscookiens token-hash |
+| `PA_OTP_LOGIN_URL`, `PA_OTP_VERIFY_URL` | `lib/pa-otp.js` — samme PA-flows som `intern.html` bruger i dag. Bevidst genbrug, se `docs/hub-plan.md` |
 
 ⚠️ `PSEUDONYM_SECRET` må aldrig roteres uden en migration, der genberegner alle hashes.
 Roteres den uden, mister alle brugere deres historik permanent.

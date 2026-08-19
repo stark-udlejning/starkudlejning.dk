@@ -444,3 +444,20 @@ a.kort:hover, button.kort:hover {
 @media (min-width: 560px) { .gitter { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 900px) { .gitter { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 1100px) { .gitter--4 { grid-template-columns: repeat(4, 1fr); } }
+
+/* Introafsnit lige under en h1 — samme mønster på tværs af sider, så ingen
+   side behøver sin egen inline style (CSP: style-src 'self', §10). */
+.side__intro { margin-top: var(--plads-2); max-width: 60ch; }
+
+/* ── Login ───────────────────────────────────────────────────────────────────
+   Smal, centreret formularkort. Bruges af login.html — og af ethvert senere
+   enkeltstående auth-flow (fx /kunde/login, CLAUDE.md §8). */
+.login-side { display: grid; place-items: center; }
+
+.login-kort { width: 100%; max-width: var(--bredde-smal); }
+.login-kort h1 { font-size: var(--tekst-xl); }
+.login-kort > .hjaelpetekst { margin-top: var(--plads-1); }
+.login-kort form { margin-top: var(--plads-5); }
+.login-kort .knap--stor { margin-top: var(--plads-4); }
+.login-kort .knap--tekst { margin-top: var(--plads-2); }
+#besked-omraade .besked { margin-top: var(--plads-4); }

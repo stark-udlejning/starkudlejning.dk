@@ -10,38 +10,132 @@
 </head>
 <body>
 <!--
-  MIDLERTIDIG PLADSHOLDER.
-  Den rigtige landingsside — med søgning, alle kort, låste admin-kort og
-  akademiets fremdrift som ét statuspunkt — bygges i PR 2 (CLAUDE.md §9.2,
-  prompt 01). Filen findes kun, så en deploy preview af denne PR ikke rammer 404.
+  MIDLERTIDIG HUB. Erstattes af den rigtige landingsside efter CLAUDE.md §9.2,
+  i takt med at ruterne i §1 går i luften — se docs/hub-plan.md. Hvert kort her
+  peger i dag på det GAMLE site (et af de nuværende Netlify-sites); efterhånden
+  som en ny rute erstatter et gammelt site, rettes kun det ene korts href.
 -->
+<a class="spring-til-indhold" href="#indhold">Spring til indhold</a>
 <div class="side">
-  <header class="header">
-    <div class="indhold header__rk">
-      <a class="logo" href="/">
-        <span class="logo__mark" aria-hidden="true">S</span>
-        <span class="logo__navn">Stark</span>
-        <span class="logo__tag">Udlejning</span>
-      </a>
-    </div>
-  </header>
+  <div id="header"></div>
 
-  <main class="side__hoved indhold">
-    <h1>Platformen er under opbygning</h1>
-    <p style="margin-top:var(--plads-3);max-width:60ch">
-      Fundamentet og designsystemet er på plads. Landingssiden og login kommer i næste
-      leverance. De nuværende sites kører uforstyrret imens.
+  <main id="indhold" class="side__hoved indhold">
+    <h1>Alle værktøjer, ét sted</h1>
+    <p class="hjaelpetekst side__intro">
+      Midlertidig samling af de nuværende sites, indtil starkudlejning.dk er klar. Hvert
+      kort åbner det site, der er i drift i dag, i en ny fane. Login her er separat fra
+      login på de enkelte sites.
     </p>
-    <p style="margin-top:var(--plads-4)">
-      <a class="knap knap--sekundaer" href="/shared/demo.html">Se komponentarket</a>
-    </p>
+
+    <section class="sektion" id="samhandel">
+      <h2 class="sektion__titel">Samhandel</h2>
+      <div class="gitter">
+        <a class="kort" href="https://stark-udlejning.netlify.app/intern.html" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">T</div>
+          <div class="kort__titel">Tilbud</div>
+          <div class="kort__tekst">Priser, beregnere og tilbudshistorik (intern.html)</div>
+        </a>
+        <a class="kort" href="https://stark-udlejning.netlify.app/index.html" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">S</div>
+          <div class="kort__titel">Ny samhandelsaftale</div>
+          <div class="kort__tekst">Opret en samhandelsaftale med rabatter</div>
+        </a>
+        <a class="kort" href="https://stark-udlejning.netlify.app/mit-omraade.html" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">O</div>
+          <div class="kort__titel">Mit område</div>
+          <div class="kort__tekst">Sælgerens eget overblik over aftaler</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="sektion" id="akademi">
+      <h2 class="sektion__titel">Akademi</h2>
+      <div class="gitter">
+        <a class="kort" href="https://stark-udlejning-akademi.netlify.app/" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">A</div>
+          <div class="kort__titel">Akademiet</div>
+          <div class="kort__tekst">Kursusmoduler og fremdrift</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="sektion" id="hub">
+      <h2 class="sektion__titel">HUB</h2>
+      <div class="gitter">
+        <a class="kort" href="https://stark-udlejning-hub.netlify.app/" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">H</div>
+          <div class="kort__titel">Tidsregistrering</div>
+          <div class="kort__tekst">HUB</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="sektion" id="vaerktoejer">
+      <h2 class="sektion__titel">Værktøjer</h2>
+      <div class="gitter">
+        <a class="kort" href="https://stark-udlejning-rekvisitionsgenerator.netlify.app/" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">R</div>
+          <div class="kort__titel">Rekvisitionsgenerator</div>
+          <div class="kort__tekst">Rekvisitionsnumre</div>
+        </a>
+        <a class="kort" href="https://stark-udlejning-opmaaling.netlify.app/" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">M</div>
+          <div class="kort__titel">Opmåling</div>
+          <div class="kort__tekst">Digitalt opmålingsværktøj</div>
+        </a>
+        <a class="kort" href="https://stark-udlejning-stickers.netlify.app/" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">K</div>
+          <div class="kort__titel">Stickers</div>
+          <div class="kort__tekst">Bestilling af mærkater</div>
+        </a>
+        <a class="kort" href="https://stark-udlejning-merchandise.netlify.app/" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">B</div>
+          <div class="kort__titel">Merchandise</div>
+          <div class="kort__tekst">Branded merchandise</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="sektion" id="rapportering">
+      <h2 class="sektion__titel">Rapportering</h2>
+      <div class="gitter">
+        <a class="kort" href="https://stark-udlejning-rapportering.netlify.app/afvigelsesrapportering" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">!</div>
+          <div class="kort__titel">Afvigelsesrapportering</div>
+          <div class="kort__tekst">Daglige afvigelser og driftshændelser</div>
+        </a>
+        <a class="kort" href="https://stark-udlejning-rapportering.netlify.app/klage-johs-sorensen" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">K</div>
+          <div class="kort__titel">Klager — Johs. Sørensen</div>
+          <div class="kort__tekst">Klager og indsigelser vedr. JS Transport</div>
+        </a>
+        <a class="kort" href="https://stark-udlejning-rapportering.netlify.app/oenskeliste-maskiner" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">Ø</div>
+          <div class="kort__titel">Ønskeliste til maskiner</div>
+          <div class="kort__tekst">Nye maskinønsker og udfasning</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="sektion" id="admin">
+      <h2 class="sektion__titel">Admin</h2>
+      <div class="gitter">
+        <a class="kort" data-admin-only href="https://stark-udlejning.netlify.app/admin.html" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">A</div>
+          <div class="kort__titel">Administration</div>
+          <div class="kort__tekst">Priser, brugere, nyheder</div>
+        </a>
+        <a class="kort" data-admin-only href="https://stark-udlejning.netlify.app/dashboard_v2.html" target="_blank" rel="noopener">
+          <div class="kort__ikon" aria-hidden="true">D</div>
+          <div class="kort__titel">Dashboard</div>
+          <div class="kort__tekst">Nøgletal og overblik</div>
+        </a>
+      </div>
+    </section>
   </main>
 
-  <footer class="footer">
-    <div class="indhold footer__rk">
-      <span>STARK Udlejning · internt værktøj</span>
-    </div>
-  </footer>
+  <div id="footer"></div>
 </div>
+<script type="module" src="/hub.js"></script>
 </body>
 </html>
