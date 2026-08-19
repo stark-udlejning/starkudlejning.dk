@@ -50,8 +50,7 @@ export function headerMarkup({ loggetInd = true, tag = 'Udlejning' } = {}) {
     <header class="header">
       <div class="indhold header__rk">
         <a class="logo" href="/">
-          <span class="logo__mark" aria-hidden="true">S</span>
-          <span class="logo__navn">Stark</span>
+          <img class="logo__billede" src="/top_logo.png" alt="STARK" width="120" height="32">
           <span class="logo__tag">${esc(tag)}</span>
         </a>
         ${loggetInd

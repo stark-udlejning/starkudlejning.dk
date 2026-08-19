@@ -358,22 +358,9 @@ a.kort:hover, button.kort:hover {
 
 .logo { display: flex; align-items: center; gap: var(--plads-2); text-decoration: none; }
 .logo:hover { text-decoration: none; }
-.logo__mark {
-  display: grid; place-items: center;
-  width: 30px; height: 30px;
-  background: var(--farve-orange);
-  border-radius: var(--radius-sm);
-  color: var(--farve-navy);
-  font-weight: var(--vaegt-fed);
-  font-size: var(--tekst-sm);
-}
-.logo__navn {
-  font-weight: var(--vaegt-fed);
-  letter-spacing: 0.04em;
-  color: var(--farve-tekst-omvendt);
-  text-transform: uppercase;
-  font-size: var(--tekst-md);
-}
+/* Det rigtige STARK-logo, samme fil som stark-udlejning-rapportering.netlify.app
+   bruger i dag (CLAUDE.md §10: genbrug det eksisterende, opfind intet nyt). */
+.logo__billede { display: block; height: 32px; width: auto; }
 .logo__tag {
   padding: 1px var(--plads-2);
   background: var(--farve-orange);
