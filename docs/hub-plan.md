@@ -29,21 +29,25 @@ landingsside (søgning, akademiets fremdrift som statuspunkt m.m.).
   begrundelse som CLAUDE.md §1: de hører ikke til platformen, og opgaven bad specifikt om
   de seks grupper Samhandel/Akademi/HUB/Værktøjer/Rapportering/Admin.
 
-## Rapporteringssitets tre formularer — kun to bekræftede filnavne
+## Rapporteringssitets tre formularer — nu bekræftet manuelt, uden endelse
 
-`docs/kortlaegning.md` §0.3 bekræfter, via Netlifys deploy-metadata, at
-`stark-udlejning-rapportering.netlify.app` indeholder `klage-johs-sorensen.html` og
-`oenskeliste-maskiner.html`. Begge kort linker derfor direkte til disse filnavne
-(**med** `.html` — sitet har ingen redirects, jf. kortlægningens §0.2 punkt 4, så en
-"pæn" sti uden endelse ville 404).
+`*.netlify.app` er blokeret af denne sessions egress-proxy (samme 403 på CONNECT, afprøvet
+direkte og via WebFetch, som `docs/kortlaegning.md` §0 selv rapporterer), så filnavnene
+kunne ikke bekræftes herfra. Et tidligere udkast af denne PR gættede derfor forsigtigt ud
+fra Netlifys deploy-metadata (§0.3, kun to af tre filnavne nævnt, begge **med** `.html`) —
+en antagelse, ikke en bekræftelse.
 
-Afvigelsesrapporteringens filnavn er **ikke** bekræftet — kortlægningen skriver
-eksplicit "Det faktiske filnavn er ukendt herfra" (§0.3). `*.netlify.app` er blokeret af
-denne sessions egress-proxy (samme 403 på CONNECT, afprøvet direkte og via WebFetch, som
-kortlægningens §0 selv rapporterer), så filnavnet kunne heller ikke bekræftes her. Kortet
-linker derfor til rapporteringssitets forside i stedet for at gætte en sti
-(CLAUDE.md §5.7: "jeg fandt det ikke" ≠ "det findes ikke" — og en gættet sti, der viser
-sig forkert, er værre end en ekstra klik via forsiden).
+Jesper har siden klikket alle tre links igennem i browseren og bekræftet de rigtige stier
+**uden** `.html`-endelse:
+
+- `https://stark-udlejning-rapportering.netlify.app/afvigelsesrapportering`
+- `https://stark-udlejning-rapportering.netlify.app/klage-johs-sorensen`
+- `https://stark-udlejning-rapportering.netlify.app/oenskeliste-maskiner`
+
+Alle tre kort linker nu direkte hertil. Deploy-metadataens `.html`-filnavne er stadig
+korrekte som *filer* på sitet — sitet har åbenbart pæne stier oven på dem alligevel
+(fx via Netlifys automatiske "clean URLs", selvom `docs/kortlaegning.md` §0.2 punkt 4 ikke
+fandt eksplicitte redirect-regler) — men det er url'en uden endelse, brugeren skal have.
 
 ## Login — genbruger det gamle flow (produktejerens beslutning)
 
